@@ -1,0 +1,53 @@
+name: Validate Submission
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/evaluation/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate new submissions
+        run: python validate_submission.py check-pr
+
+  update-leaderboard:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: validate
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Rebuild leaderboard
+        run: python validate_submission.py rebuild-leaderboard
+
+      - name: Commit leaderboard update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add experiments/leaderboard.json experiments/README.md
+          git diff --cached --quiet || git commit -m "Update leaderboard"
+          git push

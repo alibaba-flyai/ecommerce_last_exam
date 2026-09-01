@@ -1,0 +1,49 @@
+name: ecommerce_last_exam
+version: "1.0"
+description: "E-Commerce Last Exam: Agent benchmark for travel and e-commerce tool-use tasks"
+
+dataset:
+  repo: FlyaiLab/ecommerce_last_exam
+  configs:
+    - travel      # 500 Chinese trip_guide tasks (hotel/traffic/poi)
+    - e_commerce  # 500 English shopping tasks (fashion/health/electronics/outdoor/home)
+  split: test
+
+agent:
+  type: mini-swe-agent
+  timeout_sec: 1800
+  interface: tool-calling
+  output_file: /app/answer.json
+
+verifier:
+  timeout_sec: 1200
+  test_script: /app/tests/test.sh
+  reward_file: /logs/verifier/reward.txt
+  env:
+    JUDGE_BASE_URL: "${JUDGE_BASE_URL}"
+    JUDGE_API_KEY: "${JUDGE_API_KEY}"
+    JUDGE_MODEL: "${JUDGE_MODEL}"
+
+docker:
+  registry: ""
+  platform: linux/amd64
+
+output:
+  scores_file: scores.jsonl
+  summary_file: summary.json
+  reward_format: float  # 0.00 - 1.00
+
+submission:
+  experiments_dir: experiments/evaluation/
+  format:
+    required:
+      - metadata.yaml    # model/agent info + evaluation stats
+      - scores.jsonl     # per-instance: {instance_id, domain, reward, duration_sec}
+    optional:
+      - summary.json     # aggregate stats (auto-generated if missing)
+      - trajs/           # per-instance agent traces
+  workflow:
+    - "python run_eval.py run --dataset-config travel"
+    - "python run_eval.py report --dataset-config travel"
+    - "python run_eval.py submit --dataset-config travel --model your-model"
+    - "# then PR to experiments repo"

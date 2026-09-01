@@ -1,0 +1,6 @@
+*.local.yaml
+dist/
+__pycache__/
+.venv/
+e2e_test_results/
+*.egg-info/

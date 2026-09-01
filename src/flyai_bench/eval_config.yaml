@@ -1,0 +1,35 @@
+# Global evaluation config
+# Copy this file to eval_config.local.yaml and fill in real values
+
+dataset:
+  repo_id: FlyaiLab/ecommerce_last_exam
+  config: travel          # travel / e_commerce
+  split: test
+
+docker:
+  registry: ""
+  platform: linux/amd64
+
+agent:
+  # Command that runs the agent inside the container (mini-swe-agent: terminal tool loop)
+  cmd: "python3 /app/mini_swe_agent.py"
+  timeout_sec: 1800
+  # Agent LLM config (injected into container environment variables)
+  llm_base_url: "http://host.docker.internal:4000"
+  llm_api_key: ""
+  llm_model: "qwen3.7-plus"
+
+verifier:
+  timeout_sec: 1200
+  # Judge LLM config (injected into verifier environment variables)
+  judge_base_url: "http://host.docker.internal:4000"
+  judge_api_key: ""
+  judge_model: "qwen3.7-plus"
+
+runner:
+  concurrency: 1
+  output_dir: ./eval_results
+  # Only run the first N (null = all)
+  limit: null
+  # Skip instances that already have a reward
+  skip_done: true

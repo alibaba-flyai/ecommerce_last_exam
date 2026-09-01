@@ -1,0 +1,23 @@
+{
+  "config": "travel",
+  "total": 6,
+  "completed": 6,
+  "failed": 0,
+  "avg_reward": 0.54,
+  "runs": 3,
+  "std": 0.1429,
+  "run_scores": [
+    0.495,
+    0.7,
+    0.425
+  ],
+  "by_domain": {
+    "attraction": {
+      "count": 6,
+      "avg_reward": 0.54,
+      "min": 0.29,
+      "max": 0.71
+    }
+  },
+  "failure_breakdown": {}
+}

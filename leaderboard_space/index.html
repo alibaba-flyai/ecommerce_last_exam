@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Last Exam Leaderboard</title>
+<style>
+:root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --green: #3fb950; --rank1: #ffd700; --rank2: #c0c0c0; --rank3: #cd7f32; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+.subtitle { color: var(--muted); margin-bottom: 2rem; font-size: 0.95rem; }
+.subtitle a { color: var(--accent); text-decoration: none; }
+.tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.tab { padding: 0.7rem 1.5rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; font-size: 0.95rem; transition: all 0.15s; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.panel { display: none; }
+.panel.active { display: block; }
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th { text-align: left; padding: 0.75rem 1rem; color: var(--muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+tr:hover td { background: rgba(88,166,255,0.04); }
+.rank { font-weight: 700; width: 3rem; }
+.rank-1 { color: var(--rank1); }
+.rank-2 { color: var(--rank2); }
+.rank-3 { color: var(--rank3); }
+.reward { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--green); }
+.model { font-weight: 600; }
+.empty { text-align: center; padding: 3rem; color: var(--muted); }
+.info-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-top: 1rem; line-height: 1.7; }
+.info-card h3 { margin-bottom: 0.8rem; font-size: 1.1rem; }
+.info-card code { background: rgba(110,118,129,0.2); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.9em; }
+.info-card pre { background: rgba(110,118,129,0.15); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 0.8rem 0; font-size: 0.85rem; line-height: 1.5; }
+.badge { display: inline-block; padding: 0.15em 0.5em; border-radius: 10px; font-size: 0.8rem; font-weight: 600; }
+.badge-travel { background: rgba(56,139,253,0.15); color: #58a6ff; }
+.badge-ecom { background: rgba(63,185,80,0.15); color: #3fb950; }
+.stats { display: flex; gap: 1.5rem; margin: 1rem 0; flex-wrap: wrap; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.5rem; min-width: 140px; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+
+/* Timeline */
+.timeline { margin-top: 1.5rem; position: relative; padding-left: 2rem; }
+.timeline::before { content: ''; position: absolute; left: 0.55rem; top: 0.5rem; bottom: 0.5rem; width: 2px; background: var(--border); }
+.tl-item { position: relative; margin-bottom: 1.5rem; }
+.tl-dot { position: absolute; left: -1.7rem; top: 0.35rem; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+.tl-dot.gold { background: var(--rank1); }
+.tl-date { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.2rem; }
+.tl-body { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem; }
+.tl-model { font-weight: 700; }
+.tl-score { color: var(--green); font-weight: 700; font-variant-numeric: tabular-nums; }
+.tl-config { font-size: 0.8rem; color: var(--muted); }
+
+/* Chart area */
+.chart-container { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-top: 1rem; overflow: hidden; }
+.chart-container canvas { display: block; max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>E-Commerce Last Exam Leaderboard</h1>
+  <p class="subtitle">
+    <a href="https://huggingface.co/datasets/FlyaiLab/ecommerce_last_exam">Dataset</a> &middot;
+    <a href="https://github.com/alibaba-flyai/ecommerce_last_exam">Evaluation CLI</a> &middot;
+    120 tasks (77 travel + 43 e-commerce) &middot; pass@3
+  </p>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="overall">Overall (120)</div>
+    <div class="tab" data-tab="travel">Travel (77)</div>
+    <div class="tab" data-tab="e_commerce">E-Commerce (43)</div>
+    <div class="tab" data-tab="timeline">Timeline</div>
+    <div class="tab" data-tab="about">About</div>
+    <div class="tab" data-tab="submit">Submit</div>
+  </div>
+
+  <div id="overall" class="panel active">
+    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">Weighted average across all 120 tasks (77 travel + 43 e-commerce)</p>
+    <div id="overall-table"></div>
+  </div>
+
+  <div id="travel" class="panel">
+    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">Chinese travel planning tasks — hotel, transport, attraction</p>
+    <div id="travel-table"></div>
+  </div>
+
+  <div id="e_commerce" class="panel">
+    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">English shopping &amp; consumption tasks — gear, food, electronics, lifestyle</p>
+    <div id="ecommerce-table"></div>
+  </div>
+
+  <div id="timeline" class="panel">
+    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">Submission history — newest first</p>
+    <div class="chart-container">
+      <canvas id="score-chart"></canvas>
+    </div>
+    <div id="timeline-list"></div>
+  </div>
+
+  <div id="about" class="panel">
+    <div class="stats">
+      <div class="stat"><div class="stat-value">120</div><div class="stat-label">Total Tasks</div></div>
+      <div class="stat"><div class="stat-value">77</div><div class="stat-label">Travel (ZH)</div></div>
+      <div class="stat"><div class="stat-value">43</div><div class="stat-label">E-Commerce (EN)</div></div>
+    </div>
+    <div class="info-card">
+      <h3>About the Benchmark</h3>
+      <p>E-Commerce Last Exam evaluates LLM agents on real-world tool-use tasks. Each task runs in an isolated Docker container with domain-specific CLI tools and SQLite databases. Agents must search, analyze, and produce structured recommendations.</p>
+      <p style="margin-top:0.8rem"><strong>Travel config</strong> <span class="badge badge-travel">77 tasks</span> — Hotel booking, transport routing, attraction planning across 30+ cities. Chinese language. Tools: <code>search_hotel_list</code>, <code>search_traffic</code>, <code>search_poi_and_ticket</code>.</p>
+      <p style="margin-top:0.8rem"><strong>E-Commerce config</strong> <span class="badge badge-ecom">43 tasks</span> — Shopping decisions, price comparison, product research across travel gear, food, electronics, lifestyle. English language. Tools: <code>hotel_search</code>, <code>taobao_search</code>, <code>general_search</code>.</p>
+      <p style="margin-top:0.8rem"><strong>Scoring</strong>: Each task yields a reward in [0, 1] combining hard checks (<code>rubrics.py</code>) and LLM soft judge (<code>judge.py</code>).</p>
+    </div>
+  </div>
+
+  <div id="submit" class="panel">
+    <div class="info-card">
+      <h3>How to Submit</h3>
+      <pre>pip install flyai-bench
+
+# Run evaluation
+flyai-bench run --dataset-config travel
+
+# Package results
+flyai-bench submit --model your-model --provider your-provider</pre>
+      <p>Then open a PR to <a href="https://github.com/alibaba-flyai/ecommerce_last_exam" style="color:var(--accent)">flyai-bench</a> with your results in <code>experiments/evaluation/&lt;config&gt;/&lt;slug&gt;/</code>.</p>
+      <p style="margin-top:0.8rem">CI validates format automatically. Once merged, the leaderboard updates.</p>
+      <h3 style="margin-top:1.5rem">Required Files</h3>
+      <table>
+        <tr><th>File</th><th>Description</th></tr>
+        <tr><td><code>metadata.yaml</code></td><td>Model/agent info + evaluation stats</td></tr>
+        <tr><td><code>scores.jsonl</code></td><td>Per-instance: {instance_id, domain, reward, duration_sec}</td></tr>
+        <tr><td><code>summary.json</code></td><td>Aggregate statistics (auto-generated if missing)</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'timeline' && window._pendingChartData) {
+      requestAnimationFrame(() => {
+        renderChart(window._pendingChartData);
+        window._pendingChartData = null;
+      });
+    }
+  });
+});
+
+function renderTable(entries, containerId) {
+  const container = document.getElementById(containerId);
+  if (!entries || entries.length === 0) {
+    container.innerHTML = '<div class="empty">No submissions yet. Be the first!</div>';
+    return;
+  }
+  entries.sort((a, b) => (b.avg_reward || 0) - (a.avg_reward || 0));
+  const hasRuns = entries.some(e => e.runs > 0);
+  let cols = '<th>Rank</th><th>Model</th><th>Provider</th><th>Avg Reward</th>';
+  if (hasRuns) cols += '<th>Std</th><th>Runs</th><th>Per-Run Scores</th>';
+  cols += '<th>Completed</th><th>Date</th>';
+  let html = `<table><thead><tr>${cols}</tr></thead><tbody>`;
+  entries.forEach((e, i) => {
+    const rank = i + 1;
+    const rc = rank <= 3 ? ` rank-${rank}` : '';
+    const runScores = (e.run_scores || []).map(s => s.toFixed(4)).join(', ');
+    let row = `<td class="rank${rc}">${rank}</td>
+      <td class="model">${esc(e.model)}</td>
+      <td>${esc(e.provider)}</td>
+      <td class="reward">${(e.avg_reward || 0).toFixed(4)}</td>`;
+    if (hasRuns) row += `<td style="color:var(--muted)">±${(e.std || 0).toFixed(4)}</td>
+      <td>${e.runs || 1}</td>
+      <td style="color:var(--muted);font-size:0.85rem">${runScores}</td>`;
+    row += `<td>${e.completed || 0}/${e.total || 0}</td>
+      <td>${esc(e.date)}</td>`;
+    html += `<tr>${row}</tr>`;
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+function renderTimeline(data) {
+  const all = [];
+  for (const [config, entries] of Object.entries(data.configs || {})) {
+    if (config === 'overall') continue;
+    for (const e of entries) {
+      all.push({...e, config});
+    }
+  }
+  all.sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.avg_reward - a.avg_reward));
+
+  const container = document.getElementById('timeline-list');
+  if (all.length === 0) {
+    container.innerHTML = '<div class="empty">No submissions yet.</div>';
+    return;
+  }
+  let html = '<div class="timeline">';
+  let prevDate = '';
+  all.forEach((e, i) => {
+    const isNew = e.date !== prevDate;
+    prevDate = e.date;
+    const isTop = i === 0;
+    html += `<div class="tl-item">
+      <div class="tl-dot${isTop ? ' gold' : ''}"></div>
+      ${isNew ? `<div class="tl-date">${esc(e.date)}</div>` : ''}
+      <div class="tl-body">
+        <span class="tl-model">${esc(e.model)}</span>
+        <span class="tl-score">${(e.avg_reward || 0).toFixed(4)}</span>
+        <span class="tl-config">${esc(e.config)} &middot; ${esc(e.provider)} &middot; ${esc(e.agent)}</span>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+
+  renderChart(all);
+}
+
+function renderChart(all) {
+  const canvas = document.getElementById('score-chart');
+  const container = canvas.parentElement;
+  const containerW = container.clientWidth;
+  if (containerW < 10) {
+    window._pendingChartData = all;
+    return;
+  }
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = containerW - 48;
+  const H = 260;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const models = [...new Set(all.map(e => e.model))];
+  const dates = [...new Set(all.map(e => e.date))].sort();
+  const colors = ['#58a6ff', '#3fb950', '#f0883e', '#bc8cff', '#ff7b72', '#79c0ff'];
+
+  const pad = { top: 20, right: 20, bottom: 40, left: 50 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  const minR = Math.floor(Math.min(...all.map(e => e.avg_reward)) * 10) / 10;
+  const maxR = Math.ceil(Math.max(...all.map(e => e.avg_reward)) * 10) / 10;
+
+  ctx.fillStyle = '#161b22';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = '#30363d';
+  ctx.lineWidth = 1;
+  for (let v = minR; v <= maxR + 0.001; v += 0.1) {
+    const y = pad.top + plotH - ((v - minR) / (maxR - minR)) * plotH;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + plotW, y); ctx.stroke();
+    ctx.fillStyle = '#8b949e'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(1), pad.left - 8, y + 4);
+  }
+
+  dates.forEach((d, i) => {
+    const x = pad.left + (i / Math.max(dates.length - 1, 1)) * plotW;
+    ctx.fillStyle = '#8b949e'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(d.slice(5), x, H - pad.bottom + 20);
+  });
+
+  models.forEach((model, mi) => {
+    const points = all.filter(e => e.model === model).sort((a, b) => a.date.localeCompare(b.date));
+    const c = colors[mi % colors.length];
+    ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath();
+    points.forEach((p, pi) => {
+      const di = dates.indexOf(p.date);
+      const x = pad.left + (di / Math.max(dates.length - 1, 1)) * plotW;
+      const y = pad.top + plotH - ((p.avg_reward - minR) / (maxR - minR)) * plotH;
+      if (pi === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    points.forEach(p => {
+      const di = dates.indexOf(p.date);
+      const x = pad.left + (di / Math.max(dates.length - 1, 1)) * plotW;
+      const y = pad.top + plotH - ((p.avg_reward - minR) / (maxR - minR)) * plotH;
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+    });
+  });
+
+  let lx = pad.left + 10, ly = pad.top + 5;
+  models.forEach((model, mi) => {
+    const c = colors[mi % colors.length];
+    ctx.fillStyle = c; ctx.fillRect(lx, ly, 12, 3);
+    ctx.fillStyle = '#e6edf3'; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(model, lx + 16, ly + 5);
+    lx += ctx.measureText(model).width + 36;
+    if (lx > W - 100) { lx = pad.left + 10; ly += 16; }
+  });
+}
+
+fetch('leaderboard.json')
+  .then(r => r.json())
+  .then(data => {
+    renderTable((data.configs || {}).overall || [], 'overall-table');
+    renderTable((data.configs || {}).travel || [], 'travel-table');
+    renderTable((data.configs || {}).e_commerce || [], 'ecommerce-table');
+    renderTimeline(data);
+  })
+  .catch(() => {
+    ['overall-table','travel-table','ecommerce-table'].forEach(id => {
+      document.getElementById(id).innerHTML = '<div class="empty">Failed to load leaderboard data</div>';
+    });
+  });
+</script>
+</body>
+</html>

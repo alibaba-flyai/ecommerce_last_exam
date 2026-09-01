@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flyai-bench"
+version = "0.1.0"
+description = "E-Commerce Last Exam: Agent benchmark for travel and e-commerce tool-use tasks"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "FlyaiLab", email = "flyaimainsite@gmail.com" },
+]
+dependencies = [
+    "pyyaml>=6.0",
+    "huggingface-hub>=0.20",
+    "openai>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+flyai-bench = "flyai_bench.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flyai_bench"]

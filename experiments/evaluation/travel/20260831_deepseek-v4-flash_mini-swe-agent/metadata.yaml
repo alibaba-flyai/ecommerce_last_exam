@@ -1,0 +1,22 @@
+model:
+  name: deepseek-v4-flash
+  provider: dashscope
+  api_params:
+    temperature: 0.0
+    max_tokens: 8192
+agent:
+  type: mini-swe-agent
+  version: '1.0'
+  max_iterations: 30
+  tool_calling: terminal
+evaluation:
+  benchmark: ecommerce_last_exam
+  config: travel
+  total_instances: 6
+  completed: 6
+  failed: 0
+  avg_reward: 0.54
+  date: '2026-08-31'
+  runs: 3
+  std: 0.1429
+notes: ''
