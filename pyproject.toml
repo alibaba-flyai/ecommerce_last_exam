@@ -18,6 +18,13 @@ dependencies = [
     "openai>=1.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/alibaba-flyai/ecommerce_last_exam"
+Repository = "https://github.com/alibaba-flyai/ecommerce_last_exam"
+Dataset = "https://huggingface.co/datasets/FlyaiLab/ecommerce_last_exam"
+Leaderboard = "https://huggingface.co/spaces/FlyaiLab/ecommerce_last_exam_leaderboard"
+Issues = "https://github.com/alibaba-flyai/ecommerce_last_exam/issues"
+
 [project.optional-dependencies]
 dev = ["pytest"]
 

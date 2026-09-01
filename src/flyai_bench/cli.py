@@ -2,23 +2,12 @@
 """E-Commerce Last Exam evaluation CLI.
 
 Usage:
-  # Run evaluation with the default config
-  python run_eval.py run
-
-  # Specify a config file
-  python run_eval.py run --config eval_config.local.yaml
-
-  # Override individual parameters
-  python run_eval.py run --config eval_config.yaml --dataset-config e_commerce --limit 10
-
-  # Check evaluation progress
-  python run_eval.py status
-
-  # Generate a report
-  python run_eval.py report
-
-  # dry-run
-  python run_eval.py run --dry-run
+  flyai-bench run                                    # run with default config
+  flyai-bench run --config eval_config.local.yaml    # custom config
+  flyai-bench run --dataset-config e_commerce --limit 10
+  flyai-bench run --dry-run
+  flyai-bench status
+  flyai-bench report
 """
 import argparse
 import json
@@ -468,7 +457,7 @@ def cmd_submit(args):
     scores_path = os.path.join(out_base, "scores.jsonl")
     if not os.path.exists(scores_path):
         print(f"ERROR: no scores.jsonl at {scores_path}", file=sys.stderr)
-        print("Run evaluation first: python run_eval.py run", file=sys.stderr)
+        print("Run evaluation first: flyai-bench run", file=sys.stderr)
         sys.exit(1)
 
     results = []

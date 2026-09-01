@@ -5,8 +5,8 @@ description: "E-Commerce Last Exam: Agent benchmark for travel and e-commerce to
 dataset:
   repo: FlyaiLab/ecommerce_last_exam
   configs:
-    - travel      # 500 Chinese trip_guide tasks (hotel/traffic/poi)
-    - e_commerce  # 500 English shopping tasks (fashion/health/electronics/outdoor/home)
+    - travel      # 77 Chinese trip planning tasks (hotel/transport/attraction)
+    - e_commerce  # 43 English shopping tasks (gear/food/electronics/lifestyle)
   split: test
 
 agent:
@@ -43,7 +43,7 @@ submission:
       - summary.json     # aggregate stats (auto-generated if missing)
       - trajs/           # per-instance agent traces
   workflow:
-    - "python run_eval.py run --dataset-config travel"
-    - "python run_eval.py report --dataset-config travel"
-    - "python run_eval.py submit --dataset-config travel --model your-model"
+    - "flyai-bench run --dataset-config travel"
+    - "flyai-bench report --dataset-config travel"
+    - "flyai-bench submit --dataset-config travel --model your-model"
     - "# then PR to experiments repo"

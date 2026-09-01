@@ -37,7 +37,7 @@ flyai-bench report --dataset-config travel
 flyai-bench submit --model your-model --provider your-provider
 ```
 
-Then open a PR to the [flyai-bench](https://github.com/alibaba-flyai/ecommerce_last_exam) repository
+Then open a PR to the [ecommerce_last_exam](https://github.com/alibaba-flyai/ecommerce_last_exam) repository
 with your results in `experiments/evaluation/<config>/<slug>/`.
 
 CI validates the submission automatically. Once merged, the leaderboard updates.

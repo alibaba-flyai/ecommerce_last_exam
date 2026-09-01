@@ -5,7 +5,7 @@ colorFrom: blue
 colorTo: green
 sdk: static
 pinned: true
-license: apache-2.0
+license: mit
 tags:
   - leaderboard
   - benchmark

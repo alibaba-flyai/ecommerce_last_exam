@@ -15,21 +15,19 @@ _No submissions yet. Be the first to submit!_
 ### 1. Run Evaluation
 
 ```bash
-git clone https://github.com/alibaba-flyai/ecommerce_last_exam
-cd flyai-bench
-pip install pyyaml huggingface_hub openai
+pip install flyai-bench
 
-# Run on travel config (500 tasks)
-python run_eval.py run --dataset-config travel
+# Run on travel config (77 tasks)
+flyai-bench run --dataset-config travel
 
 # Generate report
-python run_eval.py report --dataset-config travel
+flyai-bench report --dataset-config travel
 ```
 
 ### 2. Package Results
 
 ```bash
-python run_eval.py submit \
+flyai-bench submit \
   --dataset-config travel \
   --model your-model-name \
   --provider your-provider \
@@ -38,7 +36,7 @@ python run_eval.py submit \
 
 ### 3. Submit PR
 
-1. Fork the [flyai-bench](https://github.com/alibaba-flyai/ecommerce_last_exam) repository
+1. Fork the [ecommerce_last_exam](https://github.com/alibaba-flyai/ecommerce_last_exam) repository
 2. The `submit` command already places results in `experiments/evaluation/<config>/<slug>/`
 3. Review and edit `metadata.yaml` with accurate model/agent details
 4. Open a Pull Request to the main branch
@@ -73,8 +71,8 @@ agent:
 evaluation:
   benchmark: "ecommerce_last_exam"
   config: "travel"            # travel | e_commerce
-  total_instances: 500
-  completed: 498
+  total_instances: 77
+  completed: 75
   failed: 2
   avg_reward: 0.7234
   date: "2026-08-30"
@@ -85,8 +83,8 @@ notes: "Optional description"
 
 | Config | Tasks | Language | Domain |
 |--------|-------|----------|--------|
-| `travel` | 500 | Chinese | Hotel / Traffic / POI trip planning |
-| `e_commerce` | 500 | English | Fashion / Health / Electronics shopping |
+| `travel` | 77 | Chinese | Hotel / Transport / Attraction trip planning |
+| `e_commerce` | 43 | English | Travel gear / Food / Electronics / Lifestyle shopping |
 
 ## License
 
