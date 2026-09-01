@@ -108,6 +108,15 @@ def load_instances(cfg):
         return [dict(row) for row in ds]
     except ImportError:
         pass
+    try:
+        import pandas as pd
+        from huggingface_hub import hf_hub_download
+        path = hf_hub_download(repo_id, f"data/{config}/{split}-00000-of-00001.parquet",
+                               repo_type="dataset")
+        df = pd.read_parquet(path)
+        return df.to_dict(orient="records")
+    except Exception:
+        pass
     from huggingface_hub import hf_hub_download
     path = hf_hub_download(repo_id, f"data/{config}/{split}.jsonl", repo_type="dataset")
     instances = []
