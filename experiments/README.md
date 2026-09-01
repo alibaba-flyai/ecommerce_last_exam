@@ -81,10 +81,10 @@ notes: "Optional description"
 
 ## Benchmark Configs
 
-| Config | Tasks | Language | Domain |
-|--------|-------|----------|--------|
-| `travel` | 77 | Chinese | Hotel / Transport / Attraction trip planning |
-| `e_commerce` | 43 | English | Travel gear / Food / Electronics / Lifestyle shopping |
+| Config | Tasks | Domain |
+|--------|-------|--------|
+| `travel` | 77 | Hotel / Transport / Attraction trip planning |
+| `e_commerce` | 43 | Travel gear / Food / Electronics / Lifestyle shopping |
 
 ## License
 

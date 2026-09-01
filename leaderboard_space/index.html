@@ -82,7 +82,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
   </div>
 
   <div id="travel" class="panel">
-    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">Chinese travel planning tasks — hotel, transport, attraction</p>
+    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">Travel planning tasks — hotel, transport, attraction</p>
     <div id="travel-table"></div>
   </div>
 
@@ -102,14 +102,14 @@ tr:hover td { background: rgba(88,166,255,0.04); }
   <div id="about" class="panel">
     <div class="stats">
       <div class="stat"><div class="stat-value">120</div><div class="stat-label">Total Tasks</div></div>
-      <div class="stat"><div class="stat-value">77</div><div class="stat-label">Travel (ZH)</div></div>
+      <div class="stat"><div class="stat-value">77</div><div class="stat-label">Travel</div></div>
       <div class="stat"><div class="stat-value">43</div><div class="stat-label">E-Commerce (EN)</div></div>
     </div>
     <div class="info-card">
       <h3>About the Benchmark</h3>
       <p>E-Commerce Last Exam evaluates LLM agents on real-world tool-use tasks. Each task runs in an isolated Docker container with domain-specific CLI tools and SQLite databases. Agents must search, analyze, and produce structured recommendations.</p>
-      <p style="margin-top:0.8rem"><strong>Travel config</strong> <span class="badge badge-travel">77 tasks</span> — Hotel booking, transport routing, attraction planning across 30+ cities. Chinese language. Tools: <code>search_hotel_list</code>, <code>search_traffic</code>, <code>search_poi_and_ticket</code>.</p>
-      <p style="margin-top:0.8rem"><strong>E-Commerce config</strong> <span class="badge badge-ecom">43 tasks</span> — Shopping decisions, price comparison, product research across travel gear, food, electronics, lifestyle. English language. Tools: <code>hotel_search</code>, <code>taobao_search</code>, <code>general_search</code>.</p>
+      <p style="margin-top:0.8rem"><strong>Travel config</strong> <span class="badge badge-travel">77 tasks</span> — Hotel booking, transport routing, attraction planning across 30+ cities. Tools: <code>search_hotel_list</code>, <code>search_traffic</code>, <code>search_poi_and_ticket</code>.</p>
+      <p style="margin-top:0.8rem"><strong>E-Commerce config</strong> <span class="badge badge-ecom">43 tasks</span> — Shopping decisions, price comparison, product research across travel gear, food, electronics, lifestyle. Tools: <code>hotel_search</code>, <code>taobao_search</code>, <code>general_search</code>.</p>
       <p style="margin-top:0.8rem"><strong>Scoring</strong>: Each task yields a reward in [0, 1] combining hard checks (<code>rubrics.py</code>) and LLM soft judge (<code>judge.py</code>).</p>
     </div>
   </div>

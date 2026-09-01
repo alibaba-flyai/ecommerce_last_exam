@@ -20,8 +20,8 @@ Agents must call tools via CLI, analyze results, and produce a structured answer
 ### Configs
 | Config | Tasks | Language | Domains |
 |--------|-------|----------|---------|
-| `travel` | 77 | Chinese | Hotel / Transport / Attraction |
-| `e_commerce` | 43 | English | Travel gear / Food / Electronics / Lifestyle |
+| `travel` | 77 | Hotel / Transport / Attraction |
+| `e_commerce` | 43 | Travel gear / Food / Electronics / Lifestyle |
 
 ### Scoring
 Each task is scored 0.00–1.00 combining hard checks (rubrics.py) and LLM soft judge (judge.py).
@@ -90,7 +90,7 @@ with gr.Blocks(title="E-Commerce Last Exam Leaderboard") as demo:
 
     with gr.Tabs():
         with gr.Tab("Travel (77 tasks)"):
-            gr.Markdown("Chinese travel planning tasks — hotel, transport, attraction domains")
+            gr.Markdown("Travel planning tasks — hotel, transport, attraction domains")
             travel_table = gr.Dataframe(
                 value=get_travel_df,
                 headers=["Rank", "Model", "Provider", "Agent", "Avg Reward", "Completed", "Date"],

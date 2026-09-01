@@ -13,10 +13,10 @@ results, and produce structured answers. Scores range from `0.00` to `1.00`.
 
 ## Benchmark overview
 
-| Config | Tasks | Language | Domains |
-|--------|-------|----------|---------|
-| `travel` | 77 | Chinese | Hotel / Transport / Attraction trip planning |
-| `e_commerce` | 43 | English | Travel gear / Food / Electronics / Lifestyle shopping |
+| Config | Tasks | Domains |
+|--------|-------|---------|
+| `travel` | 77 | Hotel / Transport / Attraction trip planning |
+| `e_commerce` | 43 | Travel gear / Food / Electronics / Lifestyle shopping |
 
 **Total: 120 tasks** — Dataset: [FlyaiLab/ecommerce_last_exam](https://huggingface.co/datasets/FlyaiLab/ecommerce_last_exam)
 

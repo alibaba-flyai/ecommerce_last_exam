@@ -5,8 +5,8 @@ description: "E-Commerce Last Exam: Agent benchmark for travel and e-commerce to
 dataset:
   repo: FlyaiLab/ecommerce_last_exam
   configs:
-    - travel      # 77 Chinese trip planning tasks (hotel/transport/attraction)
-    - e_commerce  # 43 English shopping tasks (gear/food/electronics/lifestyle)
+    - travel      # 77 trip planning tasks (hotel/transport/attraction)
+    - e_commerce  # 43 shopping tasks (gear/food/electronics/lifestyle)
   split: test
 
 agent:
