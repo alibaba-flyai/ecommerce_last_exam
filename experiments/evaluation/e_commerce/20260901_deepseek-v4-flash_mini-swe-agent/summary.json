@@ -1,0 +1,19 @@
+{
+  "config": "e_commerce",
+  "total": 1,
+  "completed": 1,
+  "failed": 0,
+  "avg_reward": 0.82,
+  "runs": 1,
+  "std": 0.0,
+  "run_scores": [],
+  "by_domain": {
+    "travel_domestic": {
+      "count": 1,
+      "avg_reward": 0.82,
+      "min": 0.82,
+      "max": 0.82
+    }
+  },
+  "failure_breakdown": {}
+}
