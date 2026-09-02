@@ -37,7 +37,9 @@ DEFAULT_CONFIG = {
         "platform": "linux/amd64",
     },
     "agent": {
+        "mode": "internal",
         "cmd": "python3 /app/mini_swe_agent.py",
+        "external_cmd": "",
         "timeout_sec": 1800,
         "llm_base_url": "http://host.docker.internal:4000",
         "llm_api_key": "",
@@ -82,8 +84,13 @@ def apply_overrides(cfg, args):
         cfg["runner"]["concurrency"] = args.concurrency
     if getattr(args, "output_dir", None):
         cfg["runner"]["output_dir"] = args.output_dir
+    if getattr(args, "agent_mode", None):
+        cfg["agent"]["mode"] = args.agent_mode
     if getattr(args, "agent_cmd", None):
-        cfg["agent"]["cmd"] = args.agent_cmd
+        if cfg["agent"]["mode"] == "external":
+            cfg["agent"]["external_cmd"] = args.agent_cmd
+        else:
+            cfg["agent"]["cmd"] = args.agent_cmd
     if getattr(args, "registry", None):
         cfg["docker"]["registry"] = args.registry
     return cfg
@@ -162,6 +169,15 @@ def docker_rm(name):
                    capture_output=True, text=True, timeout=30)
 
 
+def docker_port(name, container_port=9999):
+    r = subprocess.run(["docker", "port", name, str(container_port)],
+                       capture_output=True, text=True, timeout=10)
+    if r.returncode != 0:
+        return None
+    mapping = r.stdout.strip().split("\n")[0]
+    return mapping.split(":")[-1]
+
+
 # ─── Evaluation logic ─────────────────────────────────────────────────────────
 
 def eval_instance(instance, cfg, run_id=None):
@@ -183,6 +199,8 @@ def eval_instance(instance, cfg, run_id=None):
     suffix = f"_r{run_id}" if run_id is not None else ""
     container_name = f"eval_{instance_id[:12]}_{int(t0) % 10000}{suffix}"
 
+    is_external = cfg["agent"].get("mode") == "external"
+
     try:
         # 1. Pull
         image = resolve_image(instance["docker_image"], registry)
@@ -200,7 +218,11 @@ def eval_instance(instance, cfg, run_id=None):
             "JUDGE_API_KEY": cfg["verifier"]["judge_api_key"],
             "JUDGE_MODEL": cfg["verifier"]["judge_model"],
         }
+        if is_external:
+            all_env["AGENT_MODE"] = "external"
         run_cmd = ["docker", "run", "-d", "--name", container_name, "--platform", platform]
+        if is_external:
+            run_cmd += ["-p", "0:9999"]
         for k, v in all_env.items():
             if v:
                 run_cmd += ["-e", f"{k}={v}"]
@@ -223,29 +245,81 @@ def eval_instance(instance, cfg, run_id=None):
             result.update(reward=None, error=f"sandbox setup failed: {stderr[-200:]}", phase="setup")
             return result
 
-        # 4. Run the agent as the agent user (cannot read tests/ or trip.db)
-        agent_cmd = cfg["agent"]["cmd"]
-        code, stdout, stderr = docker_exec(
-            container_name, f"su agent -c '{agent_cmd}'",
-            timeout=cfg["agent"]["timeout_sec"])
-        with open(os.path.join(output_dir, "agent_stdout.txt"), "w") as f:
-            f.write(stdout)
-        with open(os.path.join(output_dir, "agent_stderr.txt"), "w") as f:
-            f.write(stderr)
+        if is_external:
+            # ── External agent mode ──
+            # 4a. Extract prompt files from container to OUTPUT_DIR/.prompt/
+            prompt_dir = os.path.join(output_dir, ".prompt")
+            os.makedirs(prompt_dir, exist_ok=True)
+            for fname in ["system.md", "instruction.md", "tool_defs.json", "context.json"]:
+                for container_path in [f"/app/{fname}", f"/app/environment/{fname}"]:
+                    if docker_cp_from(container_name, container_path, os.path.join(prompt_dir, fname)):
+                        break
 
-        if code != 0:
-            result.update(reward=None, error=f"agent exit {code}: {stderr[-100:]}",
-                          phase="agent")
-            return result
+            # 4b. Get the mapped host port for tool_server
+            host_port = docker_port(container_name, 9999)
+            if not host_port:
+                result.update(reward=None, error="failed to get mapped port for tool_server", phase="setup")
+                return result
 
-        # Copy agent output to the host
-        docker_cp_from(container_name, "/app/answer.json", os.path.join(output_dir, "answer.json"))
-        docker_cp_from(container_name, "/app/.tool_calls.jsonl",
-                       os.path.join(output_dir, "tool_calls.jsonl"))
+            # 4c. Run external agent command on the host
+            agent_env = os.environ.copy()
+            agent_env.update({
+                "INSTANCE_ID": instance_id,
+                "TOOL_SERVER_URL": f"http://localhost:{host_port}",
+                "OUTPUT_DIR": output_dir,
+                "SYSTEM_PROMPT_PATH": os.path.join(prompt_dir, "system.md"),
+                "INSTRUCTION_PATH": os.path.join(prompt_dir, "instruction.md"),
+                "TOOL_DEFS_PATH": os.path.join(prompt_dir, "tool_defs.json"),
+                "CONTEXT_PATH": os.path.join(prompt_dir, "context.json"),
+            })
+            external_cmd = cfg["agent"].get("external_cmd") or cfg["agent"]["cmd"]
+            r = subprocess.run(
+                external_cmd, shell=True, env=agent_env,
+                capture_output=True, text=True,
+                timeout=cfg["agent"]["timeout_sec"])
+            with open(os.path.join(output_dir, "agent_stdout.txt"), "w") as f:
+                f.write(r.stdout)
+            with open(os.path.join(output_dir, "agent_stderr.txt"), "w") as f:
+                f.write(r.stderr)
 
-        if not os.path.exists(os.path.join(output_dir, "answer.json")):
-            result.update(reward=None, error="answer.json not produced", phase="agent")
-            return result
+            if r.returncode != 0:
+                result.update(reward=None, error=f"agent exit {r.returncode}: {r.stderr[-100:]}",
+                              phase="agent")
+                return result
+
+            # 4d. Copy answer.json from host back into the container
+            answer_path = os.path.join(output_dir, "answer.json")
+            if not os.path.exists(answer_path):
+                result.update(reward=None, error="answer.json not produced", phase="agent")
+                return result
+            subprocess.run(["docker", "cp", answer_path, f"{container_name}:/app/answer.json"],
+                           capture_output=True, text=True, timeout=10)
+
+        else:
+            # ── Internal agent mode (existing behavior) ──
+            # 4. Run the agent as the agent user (cannot read tests/ or trip.db)
+            agent_cmd = cfg["agent"]["cmd"]
+            code, stdout, stderr = docker_exec(
+                container_name, f"su agent -c '{agent_cmd}'",
+                timeout=cfg["agent"]["timeout_sec"])
+            with open(os.path.join(output_dir, "agent_stdout.txt"), "w") as f:
+                f.write(stdout)
+            with open(os.path.join(output_dir, "agent_stderr.txt"), "w") as f:
+                f.write(stderr)
+
+            if code != 0:
+                result.update(reward=None, error=f"agent exit {code}: {stderr[-100:]}",
+                              phase="agent")
+                return result
+
+            # Copy agent output to the host
+            docker_cp_from(container_name, "/app/answer.json", os.path.join(output_dir, "answer.json"))
+            docker_cp_from(container_name, "/app/.tool_calls.jsonl",
+                           os.path.join(output_dir, "tool_calls.jsonl"))
+
+            if not os.path.exists(os.path.join(output_dir, "answer.json")):
+                result.update(reward=None, error="answer.json not produced", phase="agent")
+                return result
 
         # 5. Run the verifier as root (tests/ and trip.db readable)
         code, stdout, stderr = docker_exec(
@@ -657,7 +731,10 @@ def main():
     p_run.add_argument("--limit", type=int)
     p_run.add_argument("--concurrency", type=int)
     p_run.add_argument("--output-dir")
-    p_run.add_argument("--agent-cmd")
+    p_run.add_argument("--agent-cmd",
+                        help="Agent command (internal: runs inside container; external: runs on host)")
+    p_run.add_argument("--agent-mode", choices=["internal", "external"],
+                        help="Agent execution mode (default: internal)")
     p_run.add_argument("--registry")
     p_run.add_argument("--runs", type=int, default=1,
                         help="Number of independent runs (pass@N, default: 1)")

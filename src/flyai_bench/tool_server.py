@@ -81,6 +81,7 @@ class ToolHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = HTTPServer(("127.0.0.1", PORT), ToolHandler)
-    print(f"Tool server listening on 127.0.0.1:{PORT}", file=sys.stderr)
+    bind = "0.0.0.0" if "--expose" in sys.argv else "127.0.0.1"
+    server = HTTPServer((bind, PORT), ToolHandler)
+    print(f"Tool server listening on {bind}:{PORT}", file=sys.stderr)
     server.serve_forever()

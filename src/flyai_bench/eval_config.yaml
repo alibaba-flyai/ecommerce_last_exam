@@ -11,8 +11,12 @@ docker:
   platform: linux/amd64
 
 agent:
-  # Command that runs the agent inside the container (mini-swe-agent: terminal tool loop)
+  # internal: agent runs inside the container; external: agent runs on host via tool_server HTTP API
+  mode: internal
+  # Command for internal mode (runs inside the container)
   cmd: "python3 /app/mini_swe_agent.py"
+  # Command for external mode (runs on host; receives env vars: TOOL_SERVER_URL, OUTPUT_DIR, etc.)
+  external_cmd: ""
   timeout_sec: 1800
   # Agent LLM config (injected into container environment variables)
   llm_base_url: "http://host.docker.internal:4000"

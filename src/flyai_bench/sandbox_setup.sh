@@ -36,7 +36,11 @@ cp -a "$TOOLS_DIR" /app/.tools_real
 
 # 5. Start the Tool Server (root, background, calls .tools_real/)
 sed -i 's|TOOLS_DIR = "/app/tools"|TOOLS_DIR = "/app/.tools_real"|' /app/.tool_server.py
-python3 /app/.tool_server.py &
+if [ "${AGENT_MODE}" = "external" ]; then
+    python3 /app/.tool_server.py --expose &
+else
+    python3 /app/.tool_server.py &
+fi
 sleep 0.3
 
 # 6. Write the Python tool wrapper (correctly handles JSON array/object arguments)
