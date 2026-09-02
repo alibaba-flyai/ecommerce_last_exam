@@ -1,0 +1,1402 @@
+{
+  "configs": {
+    "overall": [
+      {
+        "model": "moonshot/kimi-k3",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5674,
+        "std": 0.0116,
+        "runs": 3,
+        "run_scores": [
+          0.5541,
+          0.5753,
+          0.5729
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "grok-4.5",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5631,
+        "std": 0.0096,
+        "runs": 3,
+        "run_scores": [
+          0.5549,
+          0.5608,
+          0.5736
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-5",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5435,
+        "std": 0.0056,
+        "runs": 3,
+        "run_scores": [
+          0.5387,
+          0.5421,
+          0.5496
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-4-8",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5397,
+        "std": 0.002,
+        "runs": 3,
+        "run_scores": [
+          0.5384,
+          0.5386,
+          0.542
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-4-7",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.535,
+        "std": 0.0006,
+        "runs": 3,
+        "run_scores": [
+          0.5357,
+          0.5345,
+          0.5348
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-sol",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5317,
+        "std": 0.0047,
+        "runs": 3,
+        "run_scores": [
+          0.5275,
+          0.5367,
+          0.5307
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/gemini-3.7-flash",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5317,
+        "std": 0.0056,
+        "runs": 3,
+        "run_scores": [
+          0.5362,
+          0.5254,
+          0.5334
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.5",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5309,
+        "std": 0.0065,
+        "runs": 3,
+        "run_scores": [
+          0.5314,
+          0.5371,
+          0.5241
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-max",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5304,
+        "std": 0.0021,
+        "runs": 3,
+        "run_scores": [
+          0.5295,
+          0.5328,
+          0.5289
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-sonnet-5",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5303,
+        "std": 0.0065,
+        "runs": 3,
+        "run_scores": [
+          0.5277,
+          0.5377,
+          0.5256
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "claude-opus-4-6-modelrouter",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5292,
+        "std": 0.0053,
+        "runs": 3,
+        "run_scores": [
+          0.5335,
+          0.5233,
+          0.5309
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "glm-5.2",
+        "provider": "zhipu",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5282,
+        "std": 0.0023,
+        "runs": 3,
+        "run_scores": [
+          0.5297,
+          0.5293,
+          0.5256
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/gemini-3.6-flash",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5259,
+        "std": 0.0089,
+        "runs": 3,
+        "run_scores": [
+          0.5203,
+          0.5361,
+          0.5212
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-flash",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5259,
+        "std": 0.007,
+        "runs": 3,
+        "run_scores": [
+          0.5273,
+          0.5182,
+          0.5319
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "mimo-v2.5-pro",
+        "provider": "xiaomi",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5257,
+        "std": 0.0107,
+        "runs": 3,
+        "run_scores": [
+          0.5209,
+          0.5184,
+          0.538
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-terra",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5256,
+        "std": 0.0081,
+        "runs": 3,
+        "run_scores": [
+          0.5268,
+          0.533,
+          0.5169
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-27b",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5243,
+        "std": 0.0042,
+        "runs": 3,
+        "run_scores": [
+          0.5288,
+          0.5206,
+          0.5234
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "dashscope/deepseek-v4-flash",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5163,
+        "std": 0.0015,
+        "runs": 3,
+        "run_scores": [
+          0.5178,
+          0.5149,
+          0.5163
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "dashscope/deepseek-v4-pro",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5155,
+        "std": 0.0069,
+        "runs": 3,
+        "run_scores": [
+          0.5092,
+          0.5144,
+          0.5228
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.7-max",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.513,
+        "std": 0.0035,
+        "runs": 3,
+        "run_scores": [
+          0.509,
+          0.5145,
+          0.5154
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "kimi-k2.6",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5111,
+        "std": 0.0079,
+        "runs": 3,
+        "run_scores": [
+          0.5033,
+          0.511,
+          0.519
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-luna",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5101,
+        "std": 0.0067,
+        "runs": 3,
+        "run_scores": [
+          0.5064,
+          0.506,
+          0.5178
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.4",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5065,
+        "std": 0.0047,
+        "runs": 3,
+        "run_scores": [
+          0.5043,
+          0.5119,
+          0.5033
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.7-plus",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5056,
+        "std": 0.0087,
+        "runs": 3,
+        "run_scores": [
+          0.5058,
+          0.4968,
+          0.5142
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.6-plus",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5049,
+        "std": 0.0036,
+        "runs": 3,
+        "run_scores": [
+          0.5006,
+          0.507,
+          0.5068
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "kimi-k2.5",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.5047,
+        "std": 0.0024,
+        "runs": 3,
+        "run_scores": [
+          0.5071,
+          0.5023,
+          0.5048
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "glm-5",
+        "provider": "zhipu",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4985,
+        "std": 0.003,
+        "runs": 3,
+        "run_scores": [
+          0.5018,
+          0.4975,
+          0.4961
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.6-27b",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4895,
+        "std": 0.015,
+        "runs": 3,
+        "run_scores": [
+          0.4735,
+          0.4916,
+          0.5033
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "deepseek-v3.2",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4708,
+        "std": 0.0073,
+        "runs": 3,
+        "run_scores": [
+          0.4769,
+          0.4729,
+          0.4627
+        ],
+        "completed": 120,
+        "total": 120,
+        "date": "2026-08-28"
+      }
+    ],
+    "travel": [
+      {
+        "model": "moonshot/kimi-k3",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4811,
+        "std": 0.0127,
+        "runs": 3,
+        "run_scores": [
+          0.4665,
+          0.4882,
+          0.4887
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "grok-4.5",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4673,
+        "std": 0.0142,
+        "runs": 3,
+        "run_scores": [
+          0.4525,
+          0.4687,
+          0.4808
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-5",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4505,
+        "std": 0.0087,
+        "runs": 3,
+        "run_scores": [
+          0.4432,
+          0.4482,
+          0.4601
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-4-7",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4482,
+        "std": 0.0052,
+        "runs": 3,
+        "run_scores": [
+          0.4518,
+          0.4505,
+          0.4422
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-4-8",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4472,
+        "std": 0.0018,
+        "runs": 3,
+        "run_scores": [
+          0.4452,
+          0.4482,
+          0.4483
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/gemini-3.7-flash",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4451,
+        "std": 0.0067,
+        "runs": 3,
+        "run_scores": [
+          0.4477,
+          0.4375,
+          0.45
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "glm-5.2",
+        "provider": "zhipu",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4416,
+        "std": 0.0048,
+        "runs": 3,
+        "run_scores": [
+          0.4469,
+          0.4375,
+          0.4405
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.5",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.439,
+        "std": 0.0108,
+        "runs": 3,
+        "run_scores": [
+          0.4338,
+          0.4514,
+          0.4317
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/gemini-3.6-flash",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4378,
+        "std": 0.011,
+        "runs": 3,
+        "run_scores": [
+          0.4261,
+          0.4479,
+          0.4394
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-sonnet-5",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4368,
+        "std": 0.0097,
+        "runs": 3,
+        "run_scores": [
+          0.4303,
+          0.4479,
+          0.4322
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-sol",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4361,
+        "std": 0.0079,
+        "runs": 3,
+        "run_scores": [
+          0.4271,
+          0.4416,
+          0.4396
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-max",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4337,
+        "std": 0.0053,
+        "runs": 3,
+        "run_scores": [
+          0.429,
+          0.4395,
+          0.4326
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "mimo-v2.5-pro",
+        "provider": "xiaomi",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4337,
+        "std": 0.0123,
+        "runs": 3,
+        "run_scores": [
+          0.436,
+          0.4205,
+          0.4447
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-flash",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4336,
+        "std": 0.0059,
+        "runs": 3,
+        "run_scores": [
+          0.4357,
+          0.4269,
+          0.4381
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "claude-opus-4-6-modelrouter",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4334,
+        "std": 0.0034,
+        "runs": 3,
+        "run_scores": [
+          0.436,
+          0.4295,
+          0.4347
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-terra",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4323,
+        "std": 0.0112,
+        "runs": 3,
+        "run_scores": [
+          0.4361,
+          0.441,
+          0.4197
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-27b",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4321,
+        "std": 0.0073,
+        "runs": 3,
+        "run_scores": [
+          0.4401,
+          0.426,
+          0.4301
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "dashscope/deepseek-v4-pro",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4249,
+        "std": 0.0067,
+        "runs": 3,
+        "run_scores": [
+          0.4178,
+          0.426,
+          0.431
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-luna",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.422,
+        "std": 0.0086,
+        "runs": 3,
+        "run_scores": [
+          0.419,
+          0.4153,
+          0.4317
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.7-max",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4216,
+        "std": 0.0085,
+        "runs": 3,
+        "run_scores": [
+          0.4312,
+          0.4149,
+          0.4187
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "dashscope/deepseek-v4-flash",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.415,
+        "std": 0.0064,
+        "runs": 3,
+        "run_scores": [
+          0.4214,
+          0.4086,
+          0.4151
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "kimi-k2.6",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.415,
+        "std": 0.0068,
+        "runs": 3,
+        "run_scores": [
+          0.4084,
+          0.4148,
+          0.4219
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "glm-5",
+        "provider": "zhipu",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4142,
+        "std": 0.0063,
+        "runs": 3,
+        "run_scores": [
+          0.4208,
+          0.4083,
+          0.4134
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.4",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.413,
+        "std": 0.0098,
+        "runs": 3,
+        "run_scores": [
+          0.4087,
+          0.4242,
+          0.406
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "kimi-k2.5",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4114,
+        "std": 0.0041,
+        "runs": 3,
+        "run_scores": [
+          0.4148,
+          0.4068,
+          0.4126
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.7-plus",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4093,
+        "std": 0.0099,
+        "runs": 3,
+        "run_scores": [
+          0.4108,
+          0.3988,
+          0.4184
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.6-plus",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4052,
+        "std": 0.0023,
+        "runs": 3,
+        "run_scores": [
+          0.4026,
+          0.406,
+          0.4069
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.6-27b",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.4032,
+        "std": 0.0077,
+        "runs": 3,
+        "run_scores": [
+          0.3952,
+          0.4038,
+          0.4105
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "deepseek-v3.2",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.3809,
+        "std": 0.008,
+        "runs": 3,
+        "run_scores": [
+          0.3891,
+          0.3806,
+          0.3731
+        ],
+        "completed": 77,
+        "total": 77,
+        "date": "2026-08-28"
+      }
+    ],
+    "e_commerce": [
+      {
+        "model": "grok-4.5",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7865,
+        "std": 0.0094,
+        "runs": 3,
+        "run_scores": [
+          0.7937,
+          0.7758,
+          0.79
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "moonshot/kimi-k3",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7689,
+        "std": 0.01,
+        "runs": 3,
+        "run_scores": [
+          0.7586,
+          0.7785,
+          0.7695
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-5",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7604,
+        "std": 0.0017,
+        "runs": 3,
+        "run_scores": [
+          0.7616,
+          0.7612,
+          0.7584
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-max",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7561,
+        "std": 0.0071,
+        "runs": 3,
+        "run_scores": [
+          0.764,
+          0.7505,
+          0.7537
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-4-8",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7554,
+        "std": 0.0056,
+        "runs": 3,
+        "run_scores": [
+          0.756,
+          0.7495,
+          0.7607
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-sol",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7546,
+        "std": 0.0099,
+        "runs": 3,
+        "run_scores": [
+          0.7619,
+          0.7586,
+          0.7433
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "claude-opus-4-6-modelrouter",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7528,
+        "std": 0.0097,
+        "runs": 3,
+        "run_scores": [
+          0.7609,
+          0.7421,
+          0.7553
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "dashscope/deepseek-v4-flash",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7526,
+        "std": 0.0101,
+        "runs": 3,
+        "run_scores": [
+          0.7426,
+          0.7628,
+          0.7523
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-sonnet-5",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7486,
+        "std": 0.0057,
+        "runs": 3,
+        "run_scores": [
+          0.7549,
+          0.7472,
+          0.7437
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.5",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7454,
+        "std": 0.0121,
+        "runs": 3,
+        "run_scores": [
+          0.7593,
+          0.7372,
+          0.7398
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-terra",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7433,
+        "std": 0.0046,
+        "runs": 3,
+        "run_scores": [
+          0.7386,
+          0.7477,
+          0.7437
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-flash",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7411,
+        "std": 0.0097,
+        "runs": 3,
+        "run_scores": [
+          0.7412,
+          0.7314,
+          0.7507
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "mimo-v2.5-pro",
+        "provider": "xiaomi",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7405,
+        "std": 0.019,
+        "runs": 3,
+        "run_scores": [
+          0.7191,
+          0.7467,
+          0.7556
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.8-27b",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7393,
+        "std": 0.0032,
+        "runs": 3,
+        "run_scores": [
+          0.7356,
+          0.7412,
+          0.7412
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/claude-opus-4-7",
+        "provider": "anthropic",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7376,
+        "std": 0.0115,
+        "runs": 3,
+        "run_scores": [
+          0.7314,
+          0.7305,
+          0.7509
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.6-plus",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7374,
+        "std": 0.0071,
+        "runs": 3,
+        "run_scores": [
+          0.7293,
+          0.7428,
+          0.74
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "kimi-k2.6",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7353,
+        "std": 0.0105,
+        "runs": 3,
+        "run_scores": [
+          0.7247,
+          0.7356,
+          0.7456
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/gemini-3.7-flash",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7337,
+        "std": 0.0078,
+        "runs": 3,
+        "run_scores": [
+          0.7426,
+          0.7305,
+          0.7279
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "modelrouter/gemini-3.6-flash",
+        "provider": "gemini",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7313,
+        "std": 0.0169,
+        "runs": 3,
+        "run_scores": [
+          0.7402,
+          0.7419,
+          0.7119
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "glm-5.2",
+        "provider": "zhipu",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7302,
+        "std": 0.0115,
+        "runs": 3,
+        "run_scores": [
+          0.723,
+          0.7435,
+          0.7242
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.7-plus",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7302,
+        "std": 0.0065,
+        "runs": 3,
+        "run_scores": [
+          0.7274,
+          0.7256,
+          0.7377
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "dashscope/deepseek-v4-pro",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7268,
+        "std": 0.0089,
+        "runs": 3,
+        "run_scores": [
+          0.7226,
+          0.7207,
+          0.737
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.7-max",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7261,
+        "std": 0.031,
+        "runs": 3,
+        "run_scores": [
+          0.6905,
+          0.747,
+          0.7409
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.4",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7248,
+        "std": 0.0074,
+        "runs": 3,
+        "run_scores": [
+          0.7274,
+          0.7165,
+          0.7305
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "kimi-k2.5",
+        "provider": "moonshot",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7225,
+        "std": 0.0026,
+        "runs": 3,
+        "run_scores": [
+          0.7223,
+          0.7251,
+          0.72
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "gpt-5.6-luna",
+        "provider": "openai",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.7156,
+        "std": 0.0044,
+        "runs": 3,
+        "run_scores": [
+          0.7105,
+          0.7177,
+          0.7186
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "glm-5",
+        "provider": "zhipu",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.6951,
+        "std": 0.0091,
+        "runs": 3,
+        "run_scores": [
+          0.6907,
+          0.7056,
+          0.6891
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "qwen3.6-27b",
+        "provider": "dashscope",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.6909,
+        "std": 0.0321,
+        "runs": 3,
+        "run_scores": [
+          0.6563,
+          0.6965,
+          0.7198
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      },
+      {
+        "model": "deepseek-v3.2",
+        "provider": "deepseek",
+        "agent": "mini-swe-agent",
+        "avg_reward": 0.6807,
+        "std": 0.0083,
+        "runs": 3,
+        "run_scores": [
+          0.6819,
+          0.6884,
+          0.6719
+        ],
+        "completed": 43,
+        "total": 43,
+        "date": "2026-08-28"
+      }
+    ]
+  }
+}
