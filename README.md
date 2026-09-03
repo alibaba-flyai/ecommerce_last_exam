@@ -6,7 +6,7 @@
 [![Dataset](https://img.shields.io/badge/HuggingFace-Dataset-yellow)](https://huggingface.co/datasets/FlyaiLab/ecommerce_last_exam)
 [![Leaderboard](https://img.shields.io/badge/HuggingFace-Leaderboard-orange)](https://huggingface.co/spaces/FlyaiLab/ecommerce_last_exam_leaderboard)
 
-A benchmark for evaluating LLM agents on real-world travel planning and
+A benchmark for evaluating LLM agents on real-world travel scene and
 e-commerce tasks. Each task runs in an isolated Docker container with
 domain-specific CLI tools and databases. Agents must call tools, analyze
 results, and produce structured answers. Scores range from `0.00` to `1.00`.
@@ -15,7 +15,7 @@ results, and produce structured answers. Scores range from `0.00` to `1.00`.
 
 | Config | Tasks | Domains |
 |--------|-------|---------|
-| `travel` | 77 | Hotel / Transport / Attraction trip planning |
+| `travel` | 77 | Hotel / Transport / Attraction |
 | `e_commerce` | 43 | Travel gear / Food / Electronics / Lifestyle shopping |
 
 **Total: 120 tasks** — Dataset: [FlyaiLab/ecommerce_last_exam](https://huggingface.co/datasets/FlyaiLab/ecommerce_last_exam)
@@ -43,18 +43,21 @@ pip install -e .
 
 ## Quick start
 
+Run from a clone of this repository so the configuration template and
+submission directories are available:
+
 ```bash
 # 1. Copy the default config and fill in your LLM endpoint / API key
 cp eval_config.yaml eval_config.local.yaml
 # edit eval_config.local.yaml
 
 # 2. Run evaluation (dry-run first to verify setup)
-flyai-bench run --dataset-config travel --limit 5 --dry-run
-flyai-bench run --dataset-config travel --limit 5
+flyai-bench --config eval_config.local.yaml run --dataset-config travel --limit 5 --dry-run
+flyai-bench --config eval_config.local.yaml run --dataset-config travel --limit 5
 
 # 3. Check progress and generate a report
-flyai-bench status
-flyai-bench report
+flyai-bench --config eval_config.local.yaml status
+flyai-bench --config eval_config.local.yaml report
 ```
 
 ## Configuration
@@ -69,13 +72,16 @@ and fill in your values:
 | `agent.name` | Select a named custom Agent from `agents`; omit it to use the built-in Agent |
 | `agents.<name>.command` / `cwd` | Custom Agent startup argv and config-relative working directory |
 | `agents.<name>.pass_env` | Host environment variable names explicitly passed to the custom Agent |
-| `agent.output_paths` | Additional required external Agent files; `answer.json` and `answer.md` are always included |
+| `agents.<name>.output_paths` | Additional required files for that registered Agent; `agent.output_paths` is the shared default |
 | `agent.llm_base_url` / `agent.llm_api_key` / `agent.llm_model` | OpenAI-compatible endpoint, API key, and model for the Agent |
 | `verifier.judge_base_url` / `judge_api_key` / `judge_model` | Endpoint, key, and model for the judge/verifier |
 | `runner.concurrency` / `runner.limit` / `runner.skip_done` | Parallelism, instance cap (`null` = all), skip completed |
 
-> API keys are read from your local config and injected into containers as
-> environment variables. Never commit `eval_config.local.yaml`.
+> Agent credentials are exposed as `LLM_*` variables: inside the task container
+> for the built-in Agent, or in the restricted host process environment for a
+> registered Agent. A registered Agent can also read a host `LLM_API_KEY` when
+> `agent.llm_api_key` is empty. Verifier credentials are passed only to the
+> verifier. Never commit `eval_config.local.yaml`.
 
 ## Evaluation flow
 
@@ -129,8 +135,8 @@ flyai-bench submit --model deepseek-v4-flash --provider deepseek
 1. Run the evaluation and package results:
 
    ```bash
-   flyai-bench run --dataset-config travel
-   flyai-bench submit \
+   flyai-bench --config eval_config.local.yaml run --dataset-config travel
+   flyai-bench --config eval_config.local.yaml submit \
      --dataset-config travel \
      --model deepseek-v4-flash \
      --provider deepseek \
@@ -185,8 +191,7 @@ agents:
     timeout_sec: 1800
     output_paths:
       - artifacts/evidence/sources.json
-    pass_env:
-      - OPENAI_API_KEY
+    pass_env: []
 ```
 
 Run one task before starting a full evaluation:
@@ -262,10 +267,10 @@ Content-Type: application/json
 ```
 
 Tool argument names are passed through exactly as defined in the schema. The
-task image must provide a non-empty `/app/tool_defs.json`; external mode fails
-before starting the Agent when that contract is missing. Successful calls are
-recorded by the original tools in `/app/.tool_calls.jsonl`, which is consumed by
-the verifier and copied into the run artifacts.
+task image must provide a non-empty `/app/tool_defs.json`; registered Agent
+execution fails before launch when that contract is missing. Successful calls
+are recorded by the original tools in `/app/.tool_calls.jsonl`, which is
+consumed by the verifier and copied into the run artifacts.
 
 The Agent must write every path listed in `context["output"]["paths"]` below the
 declared output directory and exit with code `0`. `answer.json` and `answer.md`
@@ -298,6 +303,7 @@ ecommerce_last_exam/
 ├── sandbox_setup.sh          # container permission setup
 ├── validate_submission.py    # submission validation + leaderboard rebuild
 ├── experiments/              # submitted results + leaderboard.json
+├── dataset_card/             # HuggingFace Dataset README + eval metadata
 ├── leaderboard_space/        # HuggingFace Space (leaderboard UI)
 └── src/flyai_bench/          # installable package
 ```

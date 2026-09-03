@@ -4,7 +4,7 @@
 
 **Goal:** Add named custom Agent registrations with safe command placeholders and one-flag selection while preserving the built-in container Agent.
 
-**Architecture:** Keep the existing context manifest as the protocol boundary. Add pure config-resolution and command-rendering helpers to `flyai_bench.cli`, then route registered Agents through the existing external evaluation lifecycle using `shell=False` and a config-relative working directory.
+**Architecture:** Keep the existing context manifest as the protocol boundary. Add pure config-resolution and command-rendering helpers to `flyai_bench.cli`, then route registered Agents through the registered-Agent evaluation lifecycle using `shell=False` and a config-relative working directory.
 
 **Tech Stack:** Python 3.9+, argparse, PyYAML, subprocess, pytest
 
@@ -75,7 +75,7 @@
 - Produces: `flyai-bench --config FILE run --agent NAME`
 
 - [x] Write a subprocess-capture test proving registered Agents launch with rendered argv, `shell=False`, resolved `cwd`, and registered environment.
-- [x] Add `--agent`, resolve registrations in `apply_overrides`, and branch registered launches inside the existing external flow.
+- [x] Add `--agent`, resolve registrations in `apply_overrides`, and branch registered launches into the host-Agent flow.
 - [x] Remove the legacy external-command path and synchronize `run_eval.py`.
 - [x] Run all protocol tests.
 

@@ -16,7 +16,7 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
 .tab { padding: 0.7rem 1.5rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; font-size: 0.95rem; transition: all 0.15s; }
 .tab:hover { color: var(--text); }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.panel { display: none; }
+.panel { display: none; min-width: 0; overflow-x: auto; }
 .panel.active { display: block; }
 table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
 th { text-align: left; padding: 0.75rem 1rem; color: var(--muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
@@ -82,12 +82,12 @@ tr:hover td { background: rgba(88,166,255,0.04); }
   </div>
 
   <div id="travel" class="panel">
-    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">Travel planning tasks — hotel, transport, attraction</p>
+    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">Travel scene tasks — hotel, transport, attraction</p>
     <div id="travel-table"></div>
   </div>
 
   <div id="e_commerce" class="panel">
-    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">English shopping &amp; consumption tasks — gear, food, electronics, lifestyle</p>
+    <p style="color:var(--muted);margin-top:1rem;font-size:0.9rem">Shopping &amp; consumption tasks — gear, food, electronics, lifestyle</p>
     <div id="ecommerce-table"></div>
   </div>
 
@@ -103,7 +103,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <div class="stats">
       <div class="stat"><div class="stat-value">120</div><div class="stat-label">Total Tasks</div></div>
       <div class="stat"><div class="stat-value">77</div><div class="stat-label">Travel</div></div>
-      <div class="stat"><div class="stat-value">43</div><div class="stat-label">E-Commerce (EN)</div></div>
+      <div class="stat"><div class="stat-value">43</div><div class="stat-label">E-Commerce</div></div>
     </div>
     <div class="info-card">
       <h3>About the Benchmark</h3>
@@ -117,13 +117,17 @@ tr:hover td { background: rgba(88,166,255,0.04); }
   <div id="submit" class="panel">
     <div class="info-card">
       <h3>How to Submit</h3>
-      <pre>pip install flyai-bench
+      <pre>git clone https://github.com/alibaba-flyai/ecommerce_last_exam.git
+cd ecommerce_last_exam
+pip install flyai-bench
+cp eval_config.yaml eval_config.local.yaml
+# Edit eval_config.local.yaml with your endpoints.
 
 # Run evaluation
-flyai-bench run --dataset-config travel
+flyai-bench --config eval_config.local.yaml run --dataset-config travel
 
 # Package results
-flyai-bench submit --model your-model --provider your-provider</pre>
+flyai-bench --config eval_config.local.yaml submit --model your-model --provider your-provider</pre>
       <p>Then open a PR to <a href="https://github.com/alibaba-flyai/ecommerce_last_exam" style="color:var(--accent)">ecommerce_last_exam</a> with your results in <code>experiments/evaluation/&lt;config&gt;/&lt;slug&gt;/</code>.</p>
       <p style="margin-top:0.8rem">CI validates format automatically. Once merged, the leaderboard updates.</p>
       <h3 style="margin-top:1.5rem">Required Files</h3>

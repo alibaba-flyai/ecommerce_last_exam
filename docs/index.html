@@ -38,7 +38,7 @@ a:hover { text-decoration: underline; }
 }
 .nav-inner {
   max-width: var(--max-w); margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
 }
 .nav-brand { font-weight: 700; font-size: 1.1rem; color: var(--text); }
 .nav-links { display: flex; gap: 1.5rem; }
@@ -68,7 +68,7 @@ section { max-width: var(--max-w); margin: 0 auto; padding: 3rem 1.5rem; }
 .section-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 1.5rem; }
 
 /* Stats */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 2rem 0; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0; }
 .stat-card {
   text-align: center; padding: 1.5rem 1rem;
   background: var(--bg-alt); border-radius: 12px; border: 1px solid var(--border);
@@ -89,56 +89,13 @@ section { max-width: var(--max-w); margin: 0 auto; padding: 3rem 1.5rem; }
 .flow-step .label { font-size: 0.8rem; font-weight: 600; }
 .flow-arrow { font-size: 1.2rem; color: var(--text-light); }
 
-/* Leaderboard */
-.lb-section { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem; }
-.tabs {
-  display: flex; gap: 0.25rem; margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--border); padding-bottom: 0;
-}
-.tab {
-  padding: 0.6rem 1.2rem; cursor: pointer; font-size: 0.9rem; font-weight: 600;
-  color: var(--text-light); border-bottom: 2px solid transparent;
-  margin-bottom: -2px; transition: all 0.15s; background: none; border-top: none;
-  border-left: none; border-right: none;
-}
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-.table-wrap { overflow-x: auto; }
-table {
-  width: 100%; border-collapse: collapse; font-size: 0.88rem;
-}
-thead { background: var(--bg-alt); }
-th {
-  padding: 0.7rem 0.8rem; text-align: left; font-weight: 600;
-  color: var(--text-light); font-size: 0.8rem; text-transform: uppercase;
-  letter-spacing: 0.03em; border-bottom: 2px solid var(--border);
-  white-space: nowrap;
-}
-td {
-  padding: 0.65rem 0.8rem; border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-tr:hover { background: #f1f5f9; }
-.rank { font-weight: 700; width: 3rem; text-align: center; }
-.rank-1 { color: var(--gold); }
-.rank-2 { color: var(--silver); }
-.rank-3 { color: var(--bronze); }
-.model-name { font-weight: 600; }
-.provider { color: var(--text-light); }
-.reward { font-weight: 700; font-variant-numeric: tabular-nums; }
-.score-bar {
-  display: inline-block; height: 6px; border-radius: 3px; background: var(--primary);
-  vertical-align: middle; margin-left: 0.4rem; opacity: 0.5;
-}
-.run-scores { font-size: 0.8rem; color: var(--text-light); font-variant-numeric: tabular-nums; }
 .muted { color: var(--text-light); font-size: 0.85rem; }
 
 /* Getting Started */
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 1.5rem 0; }
 .step-card {
   padding: 1.5rem; background: var(--bg-alt); border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border); min-width: 0;
 }
 .step-card .step-num {
   display: inline-flex; align-items: center; justify-content: center;
@@ -178,7 +135,8 @@ footer {
   .flow { grid-template-columns: 1fr; gap: 0.5rem; }
   .flow-arrow { transform: rotate(90deg); }
   .steps { grid-template-columns: 1fr; }
-  .nav-links { gap: 0.75rem; }
+  .nav-links { gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
+  .nav-links a { font-size: 0.78rem; }
 }
 </style>
 </head>
@@ -190,7 +148,7 @@ footer {
     <div class="nav-brand">FlyAI</div>
     <div class="nav-links">
       <a href="#abstract">Abstract</a>
-      <a href="#leaderboard">Leaderboard</a>
+      <a href="https://huggingface.co/spaces/FlyaiLab/ecommerce_last_exam_leaderboard" target="_blank">Leaderboard</a>
       <a href="#getting-started">Quick Start</a>
       <a href="#citation">Citation</a>
     </div>
@@ -205,10 +163,6 @@ footer {
     <a class="btn btn-primary" href="https://huggingface.co/datasets/FlyaiLab/ecommerce_last_exam" target="_blank">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Dataset
-    </a>
-    <a class="btn btn-outline" href="#leaderboard">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-      Leaderboard
     </a>
     <a class="btn btn-outline" href="https://github.com/alibaba-flyai/ecommerce_last_exam" target="_blank">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -255,10 +209,6 @@ footer {
       <div class="stat-num">43</div>
       <div class="stat-label">E-Commerce Tasks</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-num" id="model-count">29</div>
-      <div class="stat-label">Models Evaluated</div>
-    </div>
   </div>
 </section>
 
@@ -278,53 +228,24 @@ footer {
   </div>
 </section>
 
-<!-- Leaderboard -->
-<section class="lb-section" id="leaderboard">
-  <h2 class="section-title">Leaderboard</h2>
-  <div class="tabs">
-    <button class="tab active" data-config="overall">Overall (120)</button>
-    <button class="tab" data-config="travel">Travel (77)</button>
-    <button class="tab" data-config="e_commerce">E-Commerce (43)</button>
-  </div>
-  <div class="table-wrap">
-    <table id="lb-table">
-      <thead>
-        <tr>
-          <th class="rank">#</th>
-          <th>Model</th>
-          <th>Provider</th>
-          <th>Avg Reward</th>
-          <th>Std</th>
-          <th>Runs</th>
-          <th>Per-Run Scores</th>
-          <th>Completed</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody id="lb-body"></tbody>
-    </table>
-  </div>
-  <p class="muted" style="margin-top:1rem; font-size:0.82rem;">
-    All models evaluated with <strong>mini-swe-agent</strong> (terminal tool loop). 3 independent runs per model.
-    Scores on 0&ndash;1 scale. Weighted overall: 70% travel + 30% e-commerce.
-  </p>
-</section>
-
 <!-- Getting Started -->
 <section id="getting-started">
   <h2 class="section-title">Getting Started</h2>
   <div class="steps">
     <div class="step-card">
       <div class="step-num">1</div>
-      <h3>Install</h3>
+      <h3>Install &amp; Configure</h3>
       <p class="muted">Python &ge; 3.10, Docker required</p>
-      <code>pip install flyai-bench</code>
+      <code>git clone https://github.com/alibaba-flyai/ecommerce_last_exam.git
+cd ecommerce_last_exam
+pip install flyai-bench
+cp eval_config.yaml eval_config.local.yaml</code>
     </div>
     <div class="step-card">
       <div class="step-num">2</div>
       <h3>Run Evaluation</h3>
       <p class="muted">Configure your LLM endpoint, then run</p>
-      <code>flyai-bench run \
+      <code>flyai-bench --config eval_config.local.yaml run \
   --dataset-config travel \
   --limit 5</code>
     </div>
@@ -332,8 +253,8 @@ footer {
       <div class="step-num">3</div>
       <h3>Submit Results</h3>
       <p class="muted">Generate report and open a PR</p>
-      <code>flyai-bench report
-flyai-bench submit \
+      <code>flyai-bench --config eval_config.local.yaml report
+flyai-bench --config eval_config.local.yaml submit \
   --model your-model \
   --provider your-provider</code>
     </div>
@@ -358,53 +279,6 @@ flyai-bench submit \
 </footer>
 
 <script>
-let DATA = null;
-let currentConfig = 'overall';
-
-async function loadData() {
-  const resp = await fetch('leaderboard.json');
-  DATA = await resp.json();
-  document.getElementById('model-count').textContent = DATA.configs.overall.length;
-  renderTable(currentConfig);
-}
-
-function renderTable(config) {
-  const entries = DATA.configs[config];
-  entries.sort((a, b) => b.avg_reward - a.avg_reward);
-  const maxReward = entries.length ? entries[0].avg_reward : 1;
-  const tbody = document.getElementById('lb-body');
-  tbody.innerHTML = '';
-
-  entries.forEach((e, i) => {
-    const rank = i + 1;
-    const rankClass = rank <= 3 ? ` rank-${rank}` : '';
-    const medalMap = { 1: '🥇', 2: '🥈', 3: '🥉' };
-    const medal = medalMap[rank] || rank;
-    const barW = Math.round((e.avg_reward / maxReward) * 60);
-    const runScores = (e.run_scores || []).map(s => s.toFixed(4)).join(', ');
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="rank${rankClass}">${medal}</td>
-      <td class="model-name">${esc(e.model)}</td>
-      <td class="provider">${esc(e.provider)}</td>
-      <td class="reward">${e.avg_reward.toFixed(4)}<span class="score-bar" style="width:${barW}px"></span></td>
-      <td class="muted">${e.std != null ? '±' + e.std.toFixed(4) : '-'}</td>
-      <td class="muted">${e.runs || '-'}</td>
-      <td class="run-scores">${runScores || '-'}</td>
-      <td class="muted">${e.completed}/${e.total}</td>
-      <td class="muted">${e.date || '-'}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function esc(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
 function copyBibtex() {
   const text = document.getElementById('bibtex').textContent.replace('Copy', '').trim();
   navigator.clipboard.writeText(text).then(() => {
@@ -414,17 +288,6 @@ function copyBibtex() {
   });
 }
 
-// Tab switching
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    currentConfig = tab.dataset.config;
-    renderTable(currentConfig);
-  });
-});
-
-loadData();
 </script>
 
 </body>

@@ -32,8 +32,7 @@ agents:
     timeout_sec: 1800
     output_paths:
       - artifacts/trajectory.jsonl
-    pass_env:
-      - OPENAI_API_KEY
+    pass_env: []
 ```
 
 `agent.name` may be overridden with `flyai-bench ... run --agent my-agent`.
@@ -71,7 +70,7 @@ Agent-owned controls such as `--max-turns` are ordinary command arguments.
 1. Load and merge the existing evaluation config, preserving top-level Agent
    registrations and the config file directory.
 2. Resolve `--agent` or `agent.name`, validate the selected registration, and
-   switch runtime mode to external.
+   activate the registered-Agent runtime.
 3. Start the task container and loopback-only Tool Server.
 4. Materialize prompts, `tool_defs.json`, task context, and
    `agent_context.json` under the task output directory.
@@ -88,8 +87,7 @@ to the manifest or substituted into process arguments.
 
 Registered Agents receive a small execution environment containing basic
 process variables (`PATH`, `HOME`, temporary-directory and locale variables),
-the existing `LLM_*` values, and variables named in `pass_env`. The legacy
-external-command path keeps its current inherited environment behavior.
+the configured `LLM_*` values, and variables named in `pass_env`.
 
 `pass_env` contains names only. A listed variable must already exist in the
 parent process; absent optional values are simply omitted. Invalid names are
@@ -116,8 +114,8 @@ the container is removed, including on failure paths.
 
 Unit tests cover config preservation, Agent selection, command rendering,
 placeholder validation, relative working directories, environment allowlists,
-legacy compatibility, and CLI parsing. Existing protocol tests cover manifest,
-output paths, Tool Server safety, and sandbox wrappers. Smoke tests exercise
+rejection of removed legacy fields, and CLI parsing. Existing protocol tests
+cover manifest, output paths, Tool Server safety, and sandbox wrappers. Smoke tests exercise
 both dataset configs with a registered example Agent.
 
 The OpenAI-compatible reference implementation is packaged as

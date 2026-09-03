@@ -1,0 +1,8 @@
+name: E-Commerce Last Exam
+description: A benchmark for evaluating LLM agents on 120 real-world travel scene and e-commerce tool-use tasks in isolated Docker environments.
+evaluation_framework: ecommerce-last-exam
+
+tasks:
+  - id: ecommerce_last_exam
+    config: default
+    split: test

@@ -15,10 +15,11 @@ agent:
   # name: example-openai-agent
   # Command for the built-in container Agent when no registered Agent is selected.
   cmd: "python3 /app/mini_swe_agent.py"
-  # Additional required files below OUTPUT_DIR/artifacts/. answer.json and answer.md are always required.
+  # Shared default for additional registered-Agent outputs below artifacts/.
+  # A registration-specific output_paths value overrides this list.
   output_paths: []
   timeout_sec: 1800
-  # Agent LLM config (injected into container environment variables)
+  # Passed as LLM_* variables to the built-in or selected registered Agent.
   llm_base_url: "http://host.docker.internal:4000"
   llm_api_key: ""
   llm_model: "qwen3.7-plus"
@@ -38,8 +39,8 @@ agents:
     cwd: .
     timeout_sec: 1800
     output_paths: []
-    pass_env:
-      - OPENAI_API_KEY
+    # Optional names of additional host environment variables to forward.
+    pass_env: []
 
 verifier:
   timeout_sec: 1200

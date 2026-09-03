@@ -5,15 +5,18 @@ description: "E-Commerce Last Exam: Agent benchmark for travel and e-commerce to
 dataset:
   repo: FlyaiLab/ecommerce_last_exam
   configs:
-    - travel      # 77 trip planning tasks (hotel/transport/attraction)
+    - travel      # 77 travel scene tasks (hotel/transport/attraction)
     - e_commerce  # 43 shopping tasks (gear/food/electronics/lifestyle)
   split: test
 
 agent:
   type: mini-swe-agent
+  custom_protocol: manifest-v1
   timeout_sec: 1800
   interface: tool-calling
-  output_file: /app/answer.json
+  output_files:
+    - /app/answer.json
+    - /app/answer.md
 
 verifier:
   timeout_sec: 1200
@@ -43,7 +46,7 @@ submission:
       - summary.json     # aggregate stats (auto-generated if missing)
       - trajs/           # per-instance agent traces
   workflow:
-    - "flyai-bench run --dataset-config travel"
-    - "flyai-bench report --dataset-config travel"
-    - "flyai-bench submit --dataset-config travel --model your-model"
+    - "flyai-bench --config eval_config.local.yaml run --dataset-config travel"
+    - "flyai-bench --config eval_config.local.yaml report --dataset-config travel"
+    - "flyai-bench --config eval_config.local.yaml submit --dataset-config travel --model your-model"
     - "# then PR to experiments repo"

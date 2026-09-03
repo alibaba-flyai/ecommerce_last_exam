@@ -4,9 +4,13 @@ Evaluation results for the [E-Commerce Last Exam](https://huggingface.co/dataset
 
 ## Leaderboard
 
+The [official leaderboard](https://huggingface.co/spaces/FlyaiLab/ecommerce_last_exam_leaderboard)
+contains the published baseline results. Community results submitted through
+pull requests are listed below.
+
 <!-- LEADERBOARD_START -->
 
-_No submissions yet. Be the first to submit!_
+_No community pull-request submissions yet._
 
 <!-- LEADERBOARD_END -->
 
@@ -16,18 +20,20 @@ _No submissions yet. Be the first to submit!_
 
 ```bash
 pip install flyai-bench
+cp eval_config.yaml eval_config.local.yaml
+# Edit eval_config.local.yaml with your Agent and verifier endpoints.
 
 # Run on travel config (77 tasks)
-flyai-bench run --dataset-config travel
+flyai-bench --config eval_config.local.yaml run --dataset-config travel
 
 # Generate report
-flyai-bench report --dataset-config travel
+flyai-bench --config eval_config.local.yaml report --dataset-config travel
 ```
 
 ### 2. Package Results
 
 ```bash
-flyai-bench submit \
+flyai-bench --config eval_config.local.yaml submit \
   --dataset-config travel \
   --model your-model-name \
   --provider your-provider \
@@ -83,7 +89,7 @@ notes: "Optional description"
 
 | Config | Tasks | Domain |
 |--------|-------|--------|
-| `travel` | 77 | Hotel / Transport / Attraction trip planning |
+| `travel` | 77 | Hotel / Transport / Attraction |
 | `e_commerce` | 43 | Travel gear / Food / Electronics / Lifestyle shopping |
 
 ## License

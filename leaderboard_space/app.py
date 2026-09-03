@@ -10,7 +10,7 @@ LEADERBOARD_FILE = Path(__file__).parent / "leaderboard.json"
 ABOUT_TEXT = """
 ## E-Commerce Last Exam
 
-A benchmark for evaluating LLM agents on real-world travel planning and e-commerce tasks.
+A benchmark for evaluating LLM agents on real-world travel scene and e-commerce tasks.
 Each task runs in a Docker container with domain-specific tools and databases.
 Agents must call tools via CLI, analyze results, and produce a structured answer.
 
@@ -18,8 +18,8 @@ Agents must call tools via CLI, analyze results, and produce a structured answer
 **Evaluation CLI**: [flyai-bench](https://github.com/alibaba-flyai/ecommerce_last_exam)
 
 ### Configs
-| Config | Tasks | Language | Domains |
-|--------|-------|----------|---------|
+| Config | Tasks | Domains |
+|--------|-------|---------|
 | `travel` | 77 | Hotel / Transport / Attraction |
 | `e_commerce` | 43 | Travel gear / Food / Electronics / Lifestyle |
 
@@ -31,10 +31,14 @@ SUBMIT_TEXT = """
 ## How to Submit
 
 ```bash
+git clone https://github.com/alibaba-flyai/ecommerce_last_exam.git
+cd ecommerce_last_exam
 pip install flyai-bench
-flyai-bench run --dataset-config travel
-flyai-bench report --dataset-config travel
-flyai-bench submit --model your-model --provider your-provider
+cp eval_config.yaml eval_config.local.yaml
+# Edit eval_config.local.yaml with your endpoints.
+flyai-bench --config eval_config.local.yaml run --dataset-config travel
+flyai-bench --config eval_config.local.yaml report --dataset-config travel
+flyai-bench --config eval_config.local.yaml submit --model your-model --provider your-provider
 ```
 
 Then open a PR to the [ecommerce_last_exam](https://github.com/alibaba-flyai/ecommerce_last_exam) repository
@@ -90,7 +94,7 @@ with gr.Blocks(title="E-Commerce Last Exam Leaderboard") as demo:
 
     with gr.Tabs():
         with gr.Tab("Travel (77 tasks)"):
-            gr.Markdown("Travel planning tasks — hotel, transport, attraction domains")
+            gr.Markdown("Travel scene tasks — hotel, transport, attraction domains")
             travel_table = gr.Dataframe(
                 value=get_travel_df,
                 headers=["Rank", "Model", "Provider", "Agent", "Avg Reward", "Completed", "Date"],
@@ -99,7 +103,7 @@ with gr.Blocks(title="E-Commerce Last Exam Leaderboard") as demo:
             )
 
         with gr.Tab("E-Commerce (43 tasks)"):
-            gr.Markdown("English shopping/consumption tasks — gear, food, electronics, lifestyle domains")
+            gr.Markdown("Shopping/consumption tasks — gear, food, electronics, lifestyle domains")
             ecom_table = gr.Dataframe(
                 value=get_ecommerce_df,
                 headers=["Rank", "Model", "Provider", "Agent", "Avg Reward", "Completed", "Date"],
