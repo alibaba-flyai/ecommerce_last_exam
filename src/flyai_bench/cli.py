@@ -3,20 +3,25 @@
 
 Usage:
   flyai-bench run                                    # run with default config
-  flyai-bench run --config eval_config.local.yaml    # custom config
+  flyai-bench --config eval_config.local.yaml run    # custom config
   flyai-bench run --dataset-config e_commerce --limit 10
   flyai-bench run --dry-run
   flyai-bench status
   flyai-bench report
 """
 import argparse
+import copy
 import json
 import os
+import posixpath
+import re
+import shlex
+import string
 import subprocess
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 try:
     import yaml
@@ -37,9 +42,8 @@ DEFAULT_CONFIG = {
         "platform": "linux/amd64",
     },
     "agent": {
-        "mode": "internal",
         "cmd": "python3 /app/mini_swe_agent.py",
-        "external_cmd": "",
+        "output_paths": [],
         "timeout_sec": 1800,
         "llm_base_url": "http://host.docker.internal:4000",
         "llm_api_key": "",
@@ -59,20 +63,368 @@ DEFAULT_CONFIG = {
     },
 }
 
+REQUIRED_EXTERNAL_OUTPUTS = ("answer.json", "answer.md")
+REGISTERED_AGENT_PROTOCOL = "manifest-v1"
+REGISTERED_AGENT_ENV_BASE = (
+    "PATH", "HOME", "USER", "LOGNAME", "TMPDIR", "TMP", "TEMP",
+    "LANG", "LC_ALL", "SYSTEMROOT", "WINDIR",
+)
+ENV_NAME_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _validate_external_output_path(value):
+    if not isinstance(value, str) or not value or "\\" in value or "\0" in value:
+        raise ValueError(f"invalid external output path: {value!r}")
+    path = PurePosixPath(value)
+    if path.is_absolute() or path == PurePosixPath(".") or ".." in path.parts:
+        raise ValueError(f"external output path must stay below OUTPUT_DIR: {value!r}")
+    normalized = path.as_posix()
+    if normalized not in REQUIRED_EXTERNAL_OUTPUTS and path.parts[0] != "artifacts":
+        raise ValueError(
+            "additional external outputs must be placed below artifacts/: "
+            f"{value!r}")
+    return normalized
+
+
+def external_output_paths(agent_cfg):
+    """Return required answer files followed by configured additional outputs."""
+    configured = agent_cfg.get("output_paths")
+    if not configured and agent_cfg.get("output_path"):
+        configured = agent_cfg.get("output_path", [])
+    elif configured is None:
+        configured = []
+    if isinstance(configured, str):
+        configured = [configured]
+    if not isinstance(configured, (list, tuple)):
+        raise ValueError("agent.output_paths must be a string or a list of strings")
+
+    result = list(REQUIRED_EXTERNAL_OUTPUTS)
+    for value in configured:
+        normalized = _validate_external_output_path(value)
+        if normalized not in result:
+            result.append(normalized)
+    return result
+
+
+def _external_output_source(output_dir, relative_path):
+    base = Path(output_dir).resolve()
+    source = base.joinpath(*PurePosixPath(relative_path).parts)
+    try:
+        resolved = source.resolve()
+    except OSError:
+        return None
+    if not resolved.is_relative_to(base) or not resolved.is_file():
+        return None
+    return source
+
+
+def missing_external_outputs(output_dir, output_paths):
+    return [
+        relative_path
+        for relative_path in output_paths
+        if _external_output_source(output_dir, relative_path) is None
+    ]
+
+
+def clear_external_outputs(output_dir, output_paths):
+    """Remove declared files left by an earlier failed or repeated run."""
+    base = Path(output_dir).resolve()
+    for relative_path in output_paths:
+        path = base.joinpath(*PurePosixPath(relative_path).parts)
+        if not path.resolve().is_relative_to(base):
+            raise ValueError(
+                f"external output path resolves outside OUTPUT_DIR: {relative_path!r}")
+        if path.is_symlink() or path.is_file():
+            path.unlink()
+
+
+def _read_optional_text(path):
+    try:
+        return Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return ""
+
+
+def _read_optional_json(path, default):
+    text = _read_optional_text(path)
+    return json.loads(text) if text else default
+
+
+def _read_external_tool_definitions(prompt_root):
+    path = prompt_root / "tool_defs.json"
+    try:
+        definitions = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise ValueError(
+            "external Agent mode requires /app/tool_defs.json in the task image") from exc
+    if not isinstance(definitions, list) or not definitions:
+        raise ValueError(
+            "external Agent mode requires a non-empty /app/tool_defs.json in the task image")
+    return definitions
+
+
+def write_external_agent_context(cfg, instance_id, tool_server_url, output_dir,
+                                 prompt_dir, output_paths):
+    """Write the complete non-secret task contract for an external Agent."""
+    prompt_root = Path(prompt_dir).resolve()
+    context_path = prompt_root / "agent_context.json"
+    agent_cfg = cfg["agent"]
+    context = {
+        "protocol_version": "1.0",
+        "instance_id": instance_id,
+        "prompts": {
+            "system": _read_optional_text(prompt_root / "system.md"),
+            "user": _read_optional_text(prompt_root / "instruction.md"),
+        },
+        "tools": {
+            "url": tool_server_url,
+            "definitions": _read_external_tool_definitions(prompt_root),
+        },
+        "task_context": _read_optional_json(prompt_root / "context.json", None),
+        "output": {
+            "directory": str(Path(output_dir).resolve()),
+            "paths": output_paths,
+        },
+        "llm": {
+            "base_url": agent_cfg.get("llm_base_url", ""),
+            "model": agent_cfg.get("llm_model", ""),
+            "api_key_env": "LLM_API_KEY",
+        },
+    }
+    context_path.write_text(
+        json.dumps(context, ensure_ascii=False, indent=2), encoding="utf-8")
+    return str(context_path)
+
+
+def _registered_agent_command_args(command):
+    if isinstance(command, str):
+        try:
+            command = shlex.split(command)
+        except ValueError as exc:
+            raise ValueError(f"invalid Agent command: {exc}") from exc
+    elif isinstance(command, (list, tuple)):
+        command = list(command)
+    else:
+        raise ValueError("Agent command must be a string or a list of strings")
+    if not command or any(not isinstance(arg, str) for arg in command):
+        raise ValueError("Agent command must contain one or more string arguments")
+    if not command[0]:
+        raise ValueError("Agent command executable must not be empty")
+    return command
+
+
+def render_registered_agent_command(command, placeholders):
+    """Render a registered Agent command into an argv list."""
+    formatter = string.Formatter()
+    rendered = []
+    for arg in _registered_agent_command_args(command):
+        try:
+            fields = list(formatter.parse(arg))
+        except ValueError as exc:
+            raise ValueError(f"invalid Agent command template {arg!r}: {exc}") from exc
+        for _, field_name, format_spec, conversion in fields:
+            if field_name is None:
+                continue
+            if field_name not in placeholders:
+                raise ValueError(
+                    f"unknown Agent command placeholder {field_name!r} in {arg!r}")
+            if format_spec or conversion:
+                raise ValueError(
+                    f"Agent command placeholder {field_name!r} cannot use formatting")
+        rendered.append(arg.format_map(placeholders))
+    return rendered
+
+
+def agent_command_placeholders(instance_id, tool_server_url, output_dir,
+                               prompt_dir, agent_context_path, config_dir):
+    prompt_root = Path(prompt_dir).resolve()
+    return {
+        "context": str(Path(agent_context_path).resolve()),
+        "output_dir": str(Path(output_dir).resolve()),
+        "instance_id": instance_id,
+        "tool_server_url": tool_server_url,
+        "system_prompt_path": str(prompt_root / "system.md"),
+        "instruction_path": str(prompt_root / "instruction.md"),
+        "tool_defs_path": str(prompt_root / "tool_defs.json"),
+        "task_context_path": str(prompt_root / "context.json"),
+        "config_dir": str(Path(config_dir).resolve()),
+    }
+
+
+def resolve_registered_agent_cwd(registration, config_dir):
+    cwd = registration.get("cwd", ".")
+    if not isinstance(cwd, str) or not cwd:
+        raise ValueError("registered Agent cwd must be a non-empty string")
+    path = Path(cwd).expanduser()
+    if not path.is_absolute():
+        path = Path(config_dir) / path
+    path = path.resolve()
+    if not path.is_dir():
+        raise ValueError(f"registered Agent working directory does not exist: {path}")
+    return str(path)
+
+
+def build_registered_agent_env(cfg, registration, base_env=None):
+    """Build the minimal host environment for a registered Agent."""
+    source = dict(os.environ if base_env is None else base_env)
+    env = {name: source[name] for name in REGISTERED_AGENT_ENV_BASE if name in source}
+    pass_env = registration.get("pass_env", [])
+    if not isinstance(pass_env, (list, tuple)):
+        raise ValueError("registered Agent pass_env must be a list of variable names")
+    for name in pass_env:
+        if not isinstance(name, str) or not ENV_NAME_PATTERN.fullmatch(name):
+            raise ValueError(f"invalid registered Agent pass_env name: {name!r}")
+        if name in source:
+            env[name] = source[name]
+
+    agent_cfg = cfg.get("agent", {})
+    llm_api_key = agent_cfg.get("llm_api_key") or source.get("LLM_API_KEY", "")
+    env.update({
+        "LLM_BASE_URL": str(agent_cfg.get("llm_base_url", "")),
+        "LLM_API_KEY": str(llm_api_key),
+        "LLM_MODEL": str(agent_cfg.get("llm_model", "")),
+    })
+    return env
+
+
+def run_registered_agent(cfg, registration, placeholders, base_env=None):
+    command = render_registered_agent_command(registration.get("command"), placeholders)
+    cwd = resolve_registered_agent_cwd(
+        registration, cfg.get("_config_dir", os.getcwd()))
+    env = build_registered_agent_env(cfg, registration, base_env=base_env)
+    timeout = registration.get("timeout_sec", cfg["agent"]["timeout_sec"])
+    return subprocess.run(
+        command,
+        shell=False,
+        cwd=cwd,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+
+
+def launch_external_agent(cfg, instance_id, tool_server_url, output_dir,
+                          prompt_dir, output_paths, agent_context_path):
+    """Launch the selected registered Agent."""
+    registration = cfg["agent"].get("registration")
+    if not registration:
+        raise ValueError("registered Agent is not selected")
+    placeholders = agent_command_placeholders(
+        instance_id=instance_id,
+        tool_server_url=tool_server_url,
+        output_dir=output_dir,
+        prompt_dir=prompt_dir,
+        agent_context_path=agent_context_path,
+        config_dir=cfg.get("_config_dir", os.getcwd()),
+    )
+    return run_registered_agent(cfg, registration, placeholders)
+
+
+def copy_external_outputs(container_name, output_dir, output_paths):
+    missing = missing_external_outputs(output_dir, output_paths)
+    if missing:
+        return False, f"required output files not produced: {', '.join(missing)}"
+
+    for relative_path in output_paths:
+        source = _external_output_source(output_dir, relative_path)
+        container_path = f"/app/{relative_path}"
+        parent = posixpath.dirname(container_path)
+        if parent != "/app":
+            code, _, stderr = docker_exec(
+                container_name, f"mkdir -p -- {shlex.quote(parent)}", timeout=10)
+            if code != 0:
+                return False, f"failed to create {parent}: {stderr[-200:]}"
+        result = subprocess.run(
+            ["docker", "cp", str(source), f"{container_name}:{container_path}"],
+            capture_output=True, text=True, timeout=30)
+        if result.returncode != 0:
+            return False, f"failed to copy {relative_path}: {result.stderr[-200:]}"
+    return True, ""
+
+
+def external_tool_port_publish_spec():
+    """Publish the ephemeral Tool Server port on the host loopback only."""
+    return "127.0.0.1::9999"
+
 
 def load_config(path):
+    config_dir = str(Path(path).expanduser().resolve().parent) if path else os.getcwd()
     if not path or not os.path.exists(path):
-        return DEFAULT_CONFIG.copy()
+        cfg = copy.deepcopy(DEFAULT_CONFIG)
+        cfg["_config_dir"] = config_dir
+        return cfg
     if yaml is None:
         print("WARNING: pyyaml not installed, using default config", file=sys.stderr)
-        return DEFAULT_CONFIG.copy()
+        cfg = copy.deepcopy(DEFAULT_CONFIG)
+        cfg["_config_dir"] = config_dir
+        return cfg
     with open(path, encoding="utf-8") as f:
         user_cfg = yaml.safe_load(f) or {}
-    cfg = DEFAULT_CONFIG.copy()
-    for section in cfg:
+    if not isinstance(user_cfg, dict):
+        raise ValueError("config file must contain a YAML mapping")
+    user_agent_cfg = user_cfg.get("agent", {})
+    if not isinstance(user_agent_cfg, dict):
+        raise ValueError("agent must be a mapping")
+    removed_fields = sorted({"mode", "external_cmd"} & user_agent_cfg.keys())
+    if removed_fields:
+        fields = ", ".join(removed_fields)
+        raise ValueError(
+            f"unsupported agent field(s): {fields}; register custom Agents under "
+            "agents and select one with agent.name or --agent")
+    cfg = copy.deepcopy(DEFAULT_CONFIG)
+    for section in DEFAULT_CONFIG:
         if section in user_cfg and isinstance(user_cfg[section], dict):
             cfg[section] = {**cfg[section], **user_cfg[section]}
+    agents = user_cfg.get("agents", {})
+    if not isinstance(agents, dict):
+        raise ValueError("agents must be a mapping of Agent names to registrations")
+    cfg["agents"] = copy.deepcopy(agents)
+    cfg["_config_dir"] = config_dir
     return cfg
+
+
+def resolve_registered_agent(cfg, selected_name=None):
+    """Activate and return a named Agent registration, if one is selected."""
+    agent_cfg = cfg.setdefault("agent", {})
+    name = selected_name or agent_cfg.get("name")
+    if not name:
+        return None
+    if not isinstance(name, str):
+        raise ValueError("agent.name must be a string")
+
+    agents = cfg.get("agents", {})
+    if not isinstance(agents, dict):
+        raise ValueError("agents must be a mapping of Agent names to registrations")
+    raw_registration = agents.get(name)
+    if not isinstance(raw_registration, dict):
+        known = ", ".join(sorted(agents)) or "none"
+        raise ValueError(f"unknown Agent {name!r}; registered Agents: {known}")
+
+    registration = copy.deepcopy(raw_registration)
+    protocol = registration.get("protocol", REGISTERED_AGENT_PROTOCOL)
+    if protocol != REGISTERED_AGENT_PROTOCOL:
+        raise ValueError(
+            f"registered Agent {name!r} uses unsupported protocol {protocol!r}; "
+            f"expected {REGISTERED_AGENT_PROTOCOL!r}")
+    _registered_agent_command_args(registration.get("command"))
+    timeout_sec = registration.get("timeout_sec")
+    if timeout_sec is not None and (
+            isinstance(timeout_sec, bool)
+            or not isinstance(timeout_sec, (int, float))
+            or timeout_sec <= 0):
+        raise ValueError(
+            f"registered Agent {name!r} timeout_sec must be a positive number")
+    registration["name"] = name
+    registration["protocol"] = protocol
+
+    agent_cfg["name"] = name
+    if "timeout_sec" in registration:
+        agent_cfg["timeout_sec"] = registration["timeout_sec"]
+    if "output_paths" in registration:
+        agent_cfg["output_paths"] = copy.deepcopy(registration["output_paths"])
+    agent_cfg["registration"] = registration
+    return registration
 
 
 def apply_overrides(cfg, args):
@@ -84,15 +436,9 @@ def apply_overrides(cfg, args):
         cfg["runner"]["concurrency"] = args.concurrency
     if getattr(args, "output_dir", None):
         cfg["runner"]["output_dir"] = args.output_dir
-    if getattr(args, "agent_mode", None):
-        cfg["agent"]["mode"] = args.agent_mode
-    if getattr(args, "agent_cmd", None):
-        if cfg["agent"]["mode"] == "external":
-            cfg["agent"]["external_cmd"] = args.agent_cmd
-        else:
-            cfg["agent"]["cmd"] = args.agent_cmd
     if getattr(args, "registry", None):
         cfg["docker"]["registry"] = args.registry
+    resolve_registered_agent(cfg, getattr(args, "agent", None))
     return cfg
 
 
@@ -198,8 +544,9 @@ def eval_instance(instance, cfg, run_id=None):
     t0 = time.time()
     suffix = f"_r{run_id}" if run_id is not None else ""
     container_name = f"eval_{instance_id[:12]}_{int(t0) % 10000}{suffix}"
+    container_started = False
 
-    is_external = cfg["agent"].get("mode") == "external"
+    is_external = bool(cfg["agent"].get("registration"))
 
     try:
         # 1. Pull
@@ -222,7 +569,7 @@ def eval_instance(instance, cfg, run_id=None):
             all_env["AGENT_MODE"] = "external"
         run_cmd = ["docker", "run", "-d", "--name", container_name, "--platform", platform]
         if is_external:
-            run_cmd += ["-p", "0:9999"]
+            run_cmd += ["-p", external_tool_port_publish_spec()]
         for k, v in all_env.items():
             if v:
                 run_cmd += ["-e", f"{k}={v}"]
@@ -231,6 +578,7 @@ def eval_instance(instance, cfg, run_id=None):
         if r.returncode != 0:
             result.update(reward=None, error=f"start failed: {r.stderr[-200:]}", phase="start")
             return result
+        container_started = True
 
         # 3. Inject sandbox script + tool_server + agent, set up permission isolation
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -247,6 +595,12 @@ def eval_instance(instance, cfg, run_id=None):
 
         if is_external:
             # ── External agent mode ──
+            try:
+                output_paths = external_output_paths(cfg["agent"])
+            except ValueError as exc:
+                result.update(reward=None, error=str(exc), phase="config")
+                return result
+
             # 4a. Extract prompt files from container to OUTPUT_DIR/.prompt/
             prompt_dir = os.path.join(output_dir, ".prompt")
             os.makedirs(prompt_dir, exist_ok=True)
@@ -262,21 +616,24 @@ def eval_instance(instance, cfg, run_id=None):
                 return result
 
             # 4c. Run external agent command on the host
-            agent_env = os.environ.copy()
-            agent_env.update({
-                "INSTANCE_ID": instance_id,
-                "TOOL_SERVER_URL": f"http://localhost:{host_port}",
-                "OUTPUT_DIR": output_dir,
-                "SYSTEM_PROMPT_PATH": os.path.join(prompt_dir, "system.md"),
-                "INSTRUCTION_PATH": os.path.join(prompt_dir, "instruction.md"),
-                "TOOL_DEFS_PATH": os.path.join(prompt_dir, "tool_defs.json"),
-                "CONTEXT_PATH": os.path.join(prompt_dir, "context.json"),
-            })
-            external_cmd = cfg["agent"].get("external_cmd") or cfg["agent"]["cmd"]
-            r = subprocess.run(
-                external_cmd, shell=True, env=agent_env,
-                capture_output=True, text=True,
-                timeout=cfg["agent"]["timeout_sec"])
+            clear_external_outputs(output_dir, output_paths)
+            agent_context_path = write_external_agent_context(
+                cfg,
+                instance_id=instance_id,
+                tool_server_url=f"http://localhost:{host_port}",
+                output_dir=output_dir,
+                prompt_dir=prompt_dir,
+                output_paths=output_paths,
+            )
+            r = launch_external_agent(
+                cfg,
+                instance_id=instance_id,
+                tool_server_url=f"http://localhost:{host_port}",
+                output_dir=output_dir,
+                prompt_dir=prompt_dir,
+                output_paths=output_paths,
+                agent_context_path=agent_context_path,
+            )
             with open(os.path.join(output_dir, "agent_stdout.txt"), "w") as f:
                 f.write(r.stdout)
             with open(os.path.join(output_dir, "agent_stderr.txt"), "w") as f:
@@ -287,13 +644,14 @@ def eval_instance(instance, cfg, run_id=None):
                               phase="agent")
                 return result
 
-            # 4d. Copy answer.json from host back into the container
-            answer_path = os.path.join(output_dir, "answer.json")
-            if not os.path.exists(answer_path):
-                result.update(reward=None, error="answer.json not produced", phase="agent")
+            # 4d. Copy every declared Agent output from the host into /app
+            copied, copy_error = copy_external_outputs(
+                container_name, output_dir, output_paths)
+            if not copied:
+                result.update(reward=None, error=copy_error, phase="agent")
                 return result
-            subprocess.run(["docker", "cp", answer_path, f"{container_name}:/app/answer.json"],
-                           capture_output=True, text=True, timeout=10)
+            docker_cp_from(container_name, "/app/.tool_calls.jsonl",
+                           os.path.join(output_dir, "tool_calls.jsonl"))
 
         else:
             # ── Internal agent mode (existing behavior) ──
@@ -350,12 +708,13 @@ def eval_instance(instance, cfg, run_id=None):
     except Exception as e:
         result.update(reward=None, error=repr(e)[:200], phase="exception")
     finally:
-        docker_rm(container_name)
+        if container_started:
+            docker_cp_from(container_name, "/app/.tool_calls.jsonl",
+                           os.path.join(output_dir, "tool_calls.jsonl"))
+            docker_rm(container_name)
         result["duration_sec"] = round(time.time() - t0, 1)
-
-    # Save the result of this single task
-    with open(os.path.join(output_dir, "result.json"), "w") as f:
-        json.dump(result, f, ensure_ascii=False, indent=2)
+        with open(os.path.join(output_dir, "result.json"), "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
 
     return result
 
@@ -731,10 +1090,8 @@ def main():
     p_run.add_argument("--limit", type=int)
     p_run.add_argument("--concurrency", type=int)
     p_run.add_argument("--output-dir")
-    p_run.add_argument("--agent-cmd",
-                        help="Agent command (internal: runs inside container; external: runs on host)")
-    p_run.add_argument("--agent-mode", choices=["internal", "external"],
-                        help="Agent execution mode (default: internal)")
+    p_run.add_argument("--agent",
+                        help="Named custom Agent registered in the config file")
     p_run.add_argument("--registry")
     p_run.add_argument("--runs", type=int, default=1,
                         help="Number of independent runs (pass@N, default: 1)")

@@ -53,7 +53,7 @@ params = {}
 i = 0
 while i < len(args):
     if args[i].startswith("--"):
-        key = args[i][2:].replace("-", "_")
+        key = args[i][2:]
         if i + 1 < len(args):
             val = args[i + 1]
             try:
@@ -86,6 +86,7 @@ chmod 644 /app/.tool_wrapper.py
 
 # 7. Replace each tool in the tools dir with the Python wrapper (supports 'python3 <tool>' and direct execution)
 for tool_path in /app/.tools_real/*; do
+    [ -f "$tool_path" ] || continue
     name=$(basename "$tool_path")
     if [[ "$name" == *.py ]]; then
         continue

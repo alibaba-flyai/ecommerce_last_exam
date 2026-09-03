@@ -8,12 +8,36 @@ Start: python3 /app/.tool_server.py &
 Call:  curl -s localhost:9999/call/search_hotel_list --data '{"city":"Hangzhou"}'
 """
 import json
+import os
+import re
 import subprocess
 import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PORT = 9999
 TOOLS_DIR = "/app/tools"
+TOOL_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*\Z")
+
+
+def validate_tool_name(tool_name):
+    """Reject paths and hidden files while allowing schema-defined tool names."""
+    if not isinstance(tool_name, str) or not TOOL_NAME_PATTERN.fullmatch(tool_name):
+        raise ValueError(f"invalid tool name: {tool_name!r}")
+    return tool_name
+
+
+def build_tool_command(tool_path, arguments):
+    """Render JSON tool arguments without changing schema property names."""
+    command = [tool_path]
+    for key, value in arguments.items():
+        if not isinstance(key, str) or not key or key.startswith("-"):
+            raise ValueError(f"invalid tool argument name: {key!r}")
+        command.append(f"--{key}")
+        if isinstance(value, (list, dict, bool)) or value is None:
+            command.append(json.dumps(value, ensure_ascii=False))
+        else:
+            command.append(str(value))
+    return command
 
 
 class ToolHandler(BaseHTTPRequestHandler):
@@ -24,6 +48,11 @@ class ToolHandler(BaseHTTPRequestHandler):
             return
 
         tool_name = path[5:]  # strip "call/"
+        try:
+            validate_tool_name(tool_name)
+        except ValueError as exc:
+            self._respond(400, {"error": str(exc)})
+            return
         tool_path = f"{TOOLS_DIR}/{tool_name}"
 
         content_len = int(self.headers.get("Content-Length", 0))
@@ -33,35 +62,38 @@ class ToolHandler(BaseHTTPRequestHandler):
         except json.JSONDecodeError:
             self._respond(400, {"error": "invalid JSON body"})
             return
+        if not isinstance(args, dict):
+            self._respond(400, {"error": "JSON body must be an object"})
+            return
 
-        cmd = [tool_path]
-        for k, v in args.items():
-            flag = f"--{k.replace('_', '-')}"
-            if isinstance(v, (list, dict)):
-                cmd += [flag, json.dumps(v, ensure_ascii=False)]
-            else:
-                cmd += [flag, str(v)]
+        try:
+            cmd = build_tool_command(tool_path, args)
+        except ValueError as exc:
+            self._respond(400, {"error": str(exc)})
+            return
 
         try:
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             if r.returncode != 0:
-                self._respond(500, {"error": r.stderr[:1000], "returncode": r.returncode})
+                payload = {"error": r.stderr[:1000], "returncode": r.returncode}
+                self._respond(500, payload)
             else:
                 try:
-                    result = json.loads(r.stdout)
-                    self._respond(200, result)
+                    payload = json.loads(r.stdout)
                 except json.JSONDecodeError:
-                    self._respond(200, {"raw": r.stdout[:5000]})
+                    payload = {"raw": r.stdout[:5000]}
+                self._respond(200, payload)
         except FileNotFoundError:
-            self._respond(404, {"error": f"tool not found: {tool_name}"})
+            payload = {"error": f"tool not found: {tool_name}"}
+            self._respond(404, payload)
         except subprocess.TimeoutExpired:
-            self._respond(504, {"error": "tool timeout"})
+            payload = {"error": "tool timeout"}
+            self._respond(504, payload)
 
     def do_GET(self):
         if self.path == "/health":
             self._respond(200, {"status": "ok"})
         elif self.path == "/tools":
-            import os
             tools = [f for f in os.listdir(TOOLS_DIR)
                      if os.path.isfile(f"{TOOLS_DIR}/{f}") and not f.endswith(".py")]
             self._respond(200, {"tools": tools})
@@ -81,6 +113,7 @@ class ToolHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = HTTPServer(("127.0.0.1", PORT), ToolHandler)
-    print(f"Tool server listening on 127.0.0.1:{PORT}", file=sys.stderr)
+    bind = "0.0.0.0" if "--expose" in sys.argv else "127.0.0.1"
+    server = HTTPServer((bind, PORT), ToolHandler)
+    print(f"Tool server listening on {bind}:{PORT}", file=sys.stderr)
     server.serve_forever()

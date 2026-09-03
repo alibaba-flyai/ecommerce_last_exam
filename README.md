@@ -66,7 +66,11 @@ and fill in your values:
 |-------|---------|
 | `dataset.repo_id` / `dataset.config` / `dataset.split` | HuggingFace dataset, config (`travel` / `e_commerce`), and split |
 | `docker.registry` | Image registry prefix. Leave empty for DockerHub (default). |
-| `agent.llm_base_url` / `agent.llm_api_key` / `agent.llm_model` | OpenAI-compatible endpoint, API key, and model for the agent |
+| `agent.name` | Select a named custom Agent from `agents`; omit it to use the built-in Agent |
+| `agents.<name>.command` / `cwd` | Custom Agent startup argv and config-relative working directory |
+| `agents.<name>.pass_env` | Host environment variable names explicitly passed to the custom Agent |
+| `agent.output_paths` | Additional required external Agent files; `answer.json` and `answer.md` are always included |
+| `agent.llm_base_url` / `agent.llm_api_key` / `agent.llm_model` | OpenAI-compatible endpoint, API key, and model for the Agent |
 | `verifier.judge_base_url` / `judge_api_key` / `judge_model` | Endpoint, key, and model for the judge/verifier |
 | `runner.concurrency` / `runner.limit` / `runner.skip_done` | Parallelism, instance cap (`null` = all), skip completed |
 
@@ -149,23 +153,135 @@ experiments/evaluation/travel/20260830_deepseek-v4-flash_mini-swe-agent/
 └── summary.json       # aggregate statistics (avg_reward, by_domain)
 ```
 
-## Writing a custom agent
+## Integrating a custom Agent
 
-Implement a script that, inside the container:
+Register your Agent once in the same YAML file used for the evaluation.
+`flyai-bench` runs it on the host while owning the dataset, Docker sandbox, tool
+execution, verifier, and result aggregation. Your Agent does not need to be
+included in the benchmark image.
 
-1. Reads `/app/tool_defs.json` for the tool definitions
-2. Reads `/app/system.md` + `/app/instruction.md` for the task
-3. Calls `/app/tools/<name> --arg val` to execute a tool
-4. Writes the result to `/app/answer.json`
+The recommended configuration passes one generated context manifest as a normal
+command argument:
 
-Point the runner at your agent with `--agent-cmd`:
+```yaml
+agent:
+  name: my-agent
+  timeout_sec: 1800
+  llm_base_url: "https://your-openai-compatible-endpoint/v1"
+  llm_api_key: ""
+  llm_model: "your-model"
 
-```bash
-flyai-bench run --agent-cmd "python /app/my_agent.py"
+agents:
+  my-agent:
+    protocol: manifest-v1
+    command:
+      - python3
+      - ./my_agent.py
+      - --context
+      - "{context}"
+      - --max-turns
+      - "30"
+    cwd: .
+    timeout_sec: 1800
+    output_paths:
+      - artifacts/evidence/sources.json
+    pass_env:
+      - OPENAI_API_KEY
 ```
 
-`agent.py` (a minimal LLM agent) and `mini_swe_agent.py` (a terminal/bash agent)
-are provided as reference implementations.
+Run one task before starting a full evaluation:
+
+```bash
+flyai-bench --config eval_config.local.yaml run \
+  --agent my-agent \
+  --dataset-config travel \
+  --limit 1
+```
+
+`agent.name` selects the default registration; `--agent` overrides it for one
+run. Relative `command` paths and `cwd` are resolved from the config file. The
+command runs as an argv list with no shell expansion. Agent-specific controls,
+such as `--max-turns`, belong directly in this command; `timeout_sec` is the
+independent wall-clock limit enforced by `flyai-bench`.
+
+For every task, the CLI writes an Agent manifest and substitutes its path for
+`{context}`. The manifest contains:
+
+```json
+{
+  "protocol_version": "1.0",
+  "instance_id": "task-id",
+  "prompts": {"system": "...", "user": "..."},
+  "tools": {
+    "url": "http://localhost:49152",
+    "definitions": [{"type": "function", "function": {"name": "..."}}]
+  },
+  "task_context": {},
+  "output": {
+    "directory": "/absolute/path/to/eval_results/...",
+    "paths": ["answer.json", "answer.md", "artifacts/evidence/sources.json"]
+  },
+  "llm": {
+    "base_url": "https://your-endpoint/v1",
+    "model": "your-model",
+    "api_key_env": "LLM_API_KEY"
+  }
+}
+```
+
+Accept and read this single file in your Agent:
+
+```python
+import argparse
+import json
+from pathlib import Path
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--context", required=True)
+args = parser.parse_args()
+context = json.loads(
+    Path(args.context).read_text(encoding="utf-8")
+)
+```
+
+Available command placeholders are `{context}`, `{output_dir}`,
+`{instance_id}`, `{tool_server_url}`, `{system_prompt_path}`,
+`{instruction_path}`, `{tool_defs_path}`, `{task_context_path}`, and
+`{config_dir}`. API keys are intentionally not available as placeholders because
+process arguments are visible to other local processes. Use `pass_env` for
+provider-specific credentials.
+
+Use `context["tools"]["definitions"]` as the LLM tool schemas. Execute a tool
+with an HTTP request to:
+
+```text
+POST {context["tools"]["url"]}/call/{tool_name}
+Content-Type: application/json
+
+{"schemaPropertyName": "value"}
+```
+
+Tool argument names are passed through exactly as defined in the schema. The
+task image must provide a non-empty `/app/tool_defs.json`; external mode fails
+before starting the Agent when that contract is missing. Successful calls are
+recorded by the original tools in `/app/.tool_calls.jsonl`, which is consumed by
+the verifier and copied into the run artifacts.
+
+The Agent must write every path listed in `context["output"]["paths"]` below the
+declared output directory and exit with code `0`. `answer.json` and `answer.md`
+are always required; additional files must live below `artifacts/` so they
+cannot overwrite the verifier or sandbox. Configured paths are required. API
+keys are never written into the manifest and remain available only through the
+`LLM_API_KEY` environment variable or names explicitly listed in `pass_env`.
+
+Each concurrent task receives its own manifest, tool port, and output directory.
+Custom Agents must be declared under `agents` and selected with `agent.name` or
+`--agent`; legacy mode and free-form command overrides are not supported.
+
+See [`examples/external_agent.py`](examples/external_agent.py) for a complete
+OpenAI-compatible function-calling loop. The same reference Agent is installed
+as `python3 -m flyai_bench.external_agent`, which is the command used by the
+`example-openai-agent` registration in `eval_config.yaml`.
 
 ## Project structure
 

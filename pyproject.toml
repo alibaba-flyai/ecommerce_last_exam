@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flyai-bench"
-version = "0.1.1"
+version = "0.1.2"
 description = "E-Commerce Last Exam: Agent benchmark for travel and e-commerce tool-use tasks"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -15,6 +15,7 @@ authors = [
 dependencies = [
     "pyyaml>=6.0",
     "huggingface-hub>=0.20",
+    "datasets>=2.14",
     "openai>=1.0",
 ]
 
